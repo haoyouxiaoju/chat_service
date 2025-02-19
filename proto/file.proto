@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package chat_im;
+
+import "base.proto";
+
+option cc_generic_services = true;
+
+//
+// 获取文件请求
+message GetSingleFileReq{
+    string request_id =1;
+    string file_id =2;
+    optional string user_id =3;
+    optional string session_id =4;
+}
+message GetSingleFileRsp{
+    string request_id =1;
+    bool success =2;
+    optional string errmsg=3;
+    optional FileDownLoadData file_data=4;
+}
+
+
+//
+//   获取多个文件 请求
+message GetMultiFileReq {
+    string request_id =1;
+    optional string user_id =2;
+    optional string session_id =3;
+    repeated string file_id_list =4;
+}
+message GetMultiFileRsp{
+    string request_id =1;
+    bool success =2;
+    optional string errmsg=3;
+    map<string,FileDownLoadData> file_data=4;
+}
+
+//
+// 上传文件 请求
+message PutSingleFileReq {
+    string request_id =1;
+    optional string user_id =2;
+    optional string session_id=3;
+    FileUpLoadData file_data=4;
+}
+message PutSingleFileRsp {
+    string request_id =1;
+    bool success =2;
+    optional string errmsg=3;
+    optional FileMessageInfo file_info =4;
+}
+
+//
+// 上传多个文件 请求
+message PutMultiFileReq {
+    string request_id =1;
+    optional string user_id =2;
+    optional string session_id =3;
+    repeated FileUpLoadData file_data=4;
+}
+message PutMultiFileRsp {
+    string request_id =1;
+    bool success =2;
+    optional string errmsg=3;
+    repeated FileMessageInfo file_info =4;
+}
+
+
+service FileService {
+    rpc GetSingleFile(GetSingleFileReq) returns (GetSingleFileRsp);
+    rpc GetMultiFile(GetMultiFileReq) returns (GetMultiFileRsp);
+    rpc PutSingleFile(PutSingleFileReq) returns (PutSingleFileRsp);
+    rpc PutMultiFile(PutMultiFileReq) returns (PutMultiFileRsp);
+}

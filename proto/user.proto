@@ -1,0 +1,189 @@
+syntax = "proto3";
+
+package chat_im;
+
+import "base.proto";
+
+option cc_generic_services = true;
+
+//
+//用户注册
+message UserRegisterReq{
+    string request_id =1;       //请求id
+    string nick_name =2;        //昵称
+    string password =3;         //密码
+    optional string verify_code_id =4;   //验证码id
+    optional string verify_code =5;      //验证码
+}
+message UserRegisterRsp{
+    string request_id =1;       //请求id
+    bool success =2;            //   
+    optional string errmsg =3;           //返回错误信息
+}
+
+//
+// 用户登录
+message UserLoginReq{
+    string request_id =1;       //请求id
+    string nick_name =2;        //昵称
+    string password =3;         //密码
+    optional string verify_code_id =4;   //验证码id
+    optional string verify_code=5;       //验证码
+}
+message UserLoginRsp{
+    string request_id =1;       //请求id
+    bool sucess =2;             //
+    string errmsg=3;             //返回错误信息
+    string login_session_id=4;  //登录会话id
+}
+
+//
+//手机号码验证码获取
+message PhoneVerifyCodeReq {
+    string request_id =1;       //请求id
+    string phone_number =2;     //手机号码
+}
+message PhoneVerifyCodeRsp {
+    string request_id =1;       //请求id
+    bool sucess =2;             //
+    string errmsg=3;            //返回错误信息
+    string verify_code_id=4;    //验证码id
+}
+
+
+//
+//手机号码注册
+message PhoneRegisterReq {
+    string request_id =1;        //请求id
+    string phone_number =2;      //手机号码
+    string verify_code_id =3;    //验证码id
+    string verify_code =4;       //验证码  
+}
+message PhoneRegisterRsp{
+    string request_id =1;        //请求id
+    bool sucess =2;              //
+    string errmsg=3;             //返回错误信息
+}
+
+//
+//手机号码登录
+message PhoneLoginReq {
+    string request_id =1;       //请求id
+    string phone_number =2;     //手机号码
+    string verify_code_id =3;   //验证码id
+    string verify_code =4;      //验证码  
+}
+message PhoneLoginRsp{
+    string request_id=1;         //请求id
+    bool success =2;             //
+    string errmsg=3;             //返回错误信息
+    string login_session_id=4;   //登录会话id
+}
+
+//
+///
+/// 获取个人信息-用于获取当前登录用户的信息
+//  客户端 只需传session_id
+//  
+message GetUserInfoReq{
+    string request_id =1;
+    optional string user_id=2;
+    optional string session_id=3;
+}
+message GetUserInfoRsp{
+    string request_id=1;
+    bool success =2;
+    string errmsg=3;
+    UserInfo user_info=4;
+}
+//
+//内部接口
+//      获取多个用户信息
+message GetMultiUserInfoReq {
+    string request_id =1;
+    repeated string users_id=2;
+}
+message GetMultiUserInfoRsp{
+    string request_id =1;
+    bool success =2;
+    string errmsg=3;
+    map<string,UserInfo> users_info=4;
+}
+
+//
+// 用户头像修改
+message SetUserAvatarReq{
+    string request_id =1;
+    optional string user_id =2;
+    optional string session_id =3;
+    bytes avatar =4;                    //头像二进制数据
+}
+message SetUserAvatarRsp{
+    string request_id =1;
+    bool success=2;
+    string errmsg=3;
+}
+
+//
+//用户昵称修改
+message SetUserNicknameReq{
+    string request_id =1;
+    optional string user_id =2;
+    optional string session_id =3;
+    string nickname=4;
+}
+message SetUserNicknameRsp{
+    string request_id =1;
+    bool success =2;
+    string errmsg=3;
+}
+
+//
+//用户签名修改
+message SetUserDescriptionReq{
+    string request_id =1;
+    optional string user_id =2;
+    optional string session_id =3;
+    string description =4;
+}
+message SetUserDescriptionRsp{
+    string request_id =1;
+    bool success=2;
+    string errmsg=3;   
+}
+
+//
+//用户手机修改
+message SetUserPhoneNumberReq{
+    string request_id =1;
+    optional string user_id =2;
+    optional string session_id=3;
+    string phone_number =4;
+    string phone_verify_code_id=5;
+    string phone_verify_code=6;
+}
+message SetUserPhoneNumberRsp{
+    string request_id =1;
+    bool success =2;
+    string errmsg=3;
+}
+
+
+
+//
+//
+service UserService{
+    rpc UserRegister(UserRegisterReq) returns (UserRegisterReq);
+    rpc UserLogin(UserLoginReq) returns (UserLoginRsp);
+    rpc GetPhoneVerifyCode(PhoneVerifyCodeReq) returns (PhoneVerifyCodeRsp);
+    rpc PhoneRegister(PhoneRegisterReq) returns (PhoneRegisterRsp); 
+    rpc PhoneLogin(PhoneLoginReq) returns (PhoneLoginRsp);
+    rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoRsp);
+    rpc GetMultiUserInfo(GetMultiUserInfoReq) returns (GetMultiUserInfoRsp);
+    rpc SetUserAvatar(SetUserAvatarReq) returns (SetUserAvatarRsp);
+    rpc SetUserNickname(SetUserNicknameReq) returns (SetUserNicknameRsp);
+    rpc SetUserDescription(SetUserDescriptionReq) returns (SetUserDescriptionRsp);
+    rpc SetUserPhoneNumber(SetUserPhoneNumberReq) returns (SetUserPhoneNumberRsp);
+  
+
+}

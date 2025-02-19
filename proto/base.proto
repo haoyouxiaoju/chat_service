@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package chat_im;
+//option cc_generic_services = true;
+
+//用户信息结构
+message UserInfo {
+    string user_id =1;          //用户Id
+    string nickname =2;         //昵称
+    string description =3 ;     //个人签名
+    string phone =4;            //绑定手机号
+    bytes avatar =5;            //头像照片，采用二进制
+}
+
+//聊天会话信息
+message ChatSessionInfo{
+    //群聊会话不需要设置，单聊会话设置为对方用户Id
+    optional string single_Id = 1 ;             
+    string chat_session_id = 2 ;                //会话Id
+    string chat_session_name =3;                //会话名称
+    optional MessageInfo prev_message =4;       //上一条消息
+    optional bytes avatar =5;                   //会话头像 -- 群聊会话不需要设置。
+
+}
+
+//消息类型
+enum MessageType{
+    STRING = 0;
+    IMAGE = 1;
+    FILE = 2;
+    SPEECH = 3;
+}
+
+message StringMessageInfo{
+    string content =1;//文字聊天内容
+}
+
+message ImageMessageInfo{
+    optional string file_id =1;             //图片文件id,客户端发送时不用设置，由服务器设置后交给storage的时候设置
+    optional bytes image_content =2;        //图片数据
+}
+
+message FileMessageInfo{
+    optional string file_id =1;             //文件id
+    int64 file_size =2;                     //文件大小
+    string file_name =3;                    //文件名称
+
+    //文件数据
+    optional bytes file_contents =4;
+}
+
+message SpeechMessageInfo{
+    //语音文件id
+    optional string file_id = 1;
+    //文件数据
+    optional bytes file_contents =2;
+}
+
+message MessageContent {
+    //消息类型
+    MessageType message_type =1;
+    oneof msg_content {
+        ImageMessageInfo image_message=5;
+        StringMessageInfo string_message=2;
+        FileMessageInfo file_message=3;
+        SpeechMessageInfo speech_message=4;
+    };
+}
+
+//消息结构
+message MessageInfo{
+    string message_id =1;//消息id
+    string chat_session_id =2;  //消息所属聊天会话id
+    int64 timeStamp =3; //消息产生时间
+    UserInfo sender =4;//   消息发送者信息
+    MessageContent data =5;
+}
+
+message Message {
+    string request_id =1;
+    MessageInfo info =2;
+}
+
+message FileDownLoadData{
+    string file_id  =1;
+    bytes file_content=2;
+}
+
+message FileUpLoadData{
+    string file_name =1;
+    int64 file_size =2;
+    bytes file_content =3;
+}

@@ -1,0 +1,48 @@
+syntax = "proto3";
+package chat_im;
+
+import "base.proto";
+
+//option cc_generic_services = true;
+
+enum NotifyType {
+    FRIEND_ADD_APPLY =0;
+    FROEMD_ADD_PROCESS =1;
+    CHAT_SESSION_CREATE =2;
+    CHAT_MESSAGE =3;
+    FRIEND_REMOVE =4;
+}
+
+message NotifyFriendAddApply{
+    UserInfo user_info =1;   //申请人信息
+}
+
+message NotifyFriendAddProcess{
+    bool agree =1;
+    UserInfo user_info =2;      //处理人消息
+}
+
+message NotifyFriendRemove{
+    string user_id =1;  //删除自己的用户Id
+}
+
+message NotifyNewChatSession{
+    ChatSessionInfo chat_session_info =1;   //新建会话信息
+}
+
+message NotifyNewMessage{
+    MessageInfo message_info =1;    //新消息
+}
+
+message NotifyMessage{
+    optional string event_id =1;//事件操作id
+    NotifyType type=2;
+    oneof notify_remarks{
+        NotifyFriendAddApply friend_add_apply=3;
+        NotifyFriendAddProcess friend_add_process=4;
+        NotifyFriendRemove friend_remove=5;
+        NotifyNewChatSession new_chat_session_info=6;
+        NotifyNewMessage new_message_info=7;
+
+    }
+}
