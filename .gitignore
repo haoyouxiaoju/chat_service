@@ -9,9 +9,14 @@ build/
 #存放所依赖的第三方库文件
 /install/
 
-# Ignore all pb file
+# Ignore all pb files
 #存放proto文件生成的源文件和头文件
 /proto/pb  
+
+# Ignore all odb out files
+# 存放odb文件生成后的文件
+/odb/out
+
 
 # Compiled Object files
 *.slo
