@@ -6,26 +6,26 @@ import "base.proto";
 
 option cc_generic_services = true;
 
-//
-//用户注册
-message UserRegisterReq{
-    string request_id =1;       //请求id
-    string nick_name =2;        //昵称
-    string password =3;         //密码
-    optional string verify_code_id =4;   //验证码id
-    optional string verify_code =5;      //验证码
-}
-message UserRegisterRsp{
-    string request_id =1;       //请求id
-    bool success =2;            //   
-    optional string errmsg =3;           //返回错误信息
-}
+////
+////用户注册
+//message UserRegisterReq{
+//    string request_id =1;       //请求id
+//    string nick_name =2;        //昵称
+//    string password =3;         //密码
+//    optional string verify_code_id =4;   //验证码id
+//    optional string verify_code =5;      //验证码
+//}
+//message UserRegisterRsp{
+//    string request_id =1;       //请求id
+//    bool success =2;            //   
+//    optional string errmsg =3;           //返回错误信息
+//}
 
 //
 // 用户登录
 message UserLoginReq{
     string request_id =1;       //请求id
-    string nick_name =2;        //昵称
+    string user_name =2;        //昵称
     string password =3;         //密码
     optional string verify_code_id =4;   //验证码id
     optional string verify_code=5;       //验证码
@@ -33,7 +33,7 @@ message UserLoginReq{
 message UserLoginRsp{
     string request_id =1;       //请求id
     bool sucess =2;             //
-    string errmsg=3;             //返回错误信息
+    optional string errmsg=3;             //返回错误信息
     string login_session_id=4;  //登录会话id
 }
 
@@ -56,13 +56,15 @@ message PhoneVerifyCodeRsp {
 message PhoneRegisterReq {
     string request_id =1;        //请求id
     string phone_number =2;      //手机号码
-    string verify_code_id =3;    //验证码id
-    string verify_code =4;       //验证码  
+    string password=3;
+    string verify_code_id =4;    //验证码id
+    string verify_code =5;       //验证码  
 }
 message PhoneRegisterRsp{
     string request_id =1;        //请求id
     bool sucess =2;              //
-    string errmsg=3;             //返回错误信息
+    optional string user_id=3;   //用户名       
+    optional string errmsg=4;             //返回错误信息
 }
 
 //
@@ -93,8 +95,8 @@ message GetUserInfoReq{
 message GetUserInfoRsp{
     string request_id=1;
     bool success =2;
-    string errmsg=3;
-    UserInfo user_info=4;
+    optional string errmsg=3;
+    optional UserInfo user_info=4;
 }
 //
 //内部接口
@@ -106,8 +108,8 @@ message GetMultiUserInfoReq {
 message GetMultiUserInfoRsp{
     string request_id =1;
     bool success =2;
-    string errmsg=3;
-    map<string,UserInfo> users_info=4;
+    optional string errmsg=3;
+    optional map<string,UserInfo> users_info=4;
 }
 
 //
@@ -173,7 +175,7 @@ message SetUserPhoneNumberRsp{
 //
 //
 service UserService{
-    rpc UserRegister(UserRegisterReq) returns (UserRegisterReq);
+    //rpc UserRegister(UserRegisterReq) returns (UserRegisterReq);
     rpc UserLogin(UserLoginReq) returns (UserLoginRsp);
     rpc GetPhoneVerifyCode(PhoneVerifyCodeReq) returns (PhoneVerifyCodeRsp);
     rpc PhoneRegister(PhoneRegisterReq) returns (PhoneRegisterRsp); 

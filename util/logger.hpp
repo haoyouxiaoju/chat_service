@@ -6,7 +6,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/async.h>
 
-namespace util{
+namespace chat_im::util{
     std::shared_ptr<spdlog::logger> __g_logger;
 
     void __init_logger__(bool mode ,const std::string& outFile_path,int logger_level){
@@ -31,10 +31,10 @@ namespace util{
     }
 }
 
-#define DEBUG(format,...) util::__g_logger->debug(std::string("[{:>10s}:{:<4d}]")+format,__FILE__,__LINE__,##__VA_ARGS__);
-#define INFO(format,...) util::__g_logger->info(std::string("[{:>10s}:{:<4d}]")+format,__FILE__,__LINE__,##__VA_ARGS__);
-#define WARN(format,...) util::__g_logger->warn(std::string("[{:>10s}:{:<4d}]")+format,__FILE__,__LINE__,##__VA_ARGS__);
-#define ERROR(format,...) util::__g_logger->error(std::string("[{:>10s}:{:<4d}]")+format,__FILE__,__LINE__,##__VA_ARGS__);
+#define DEBUG(format,...) chat_im::util::__g_logger->debug(std::string("[{:>10s}:{:<4d}]")+format,__FILE__,__LINE__,##__VA_ARGS__);
+#define INFO(format,...) chat_im::util::__g_logger->info(std::string("[{:>10s}:{:<4d}]")+format,__FILE__,__LINE__,##__VA_ARGS__);
+#define WARN(format,...) chat_im::util::__g_logger->warn(std::string("[{:>10s}:{:<4d}]")+format,__FILE__,__LINE__,##__VA_ARGS__);
+#define ERROR(format,...) chat_im::util::__g_logger->error(std::string("[{:>10s}:{:<4d}]")+format,__FILE__,__LINE__,##__VA_ARGS__);
 
 
 

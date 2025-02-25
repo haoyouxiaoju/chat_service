@@ -6,17 +6,22 @@
 
 #include <string>
 
+namespace chat_im{
+
+
 #pragma db object
-class user{
+class User{
 
 public:
-    //注册--只可手机号注册,user_id采取随机生成
-    user(const std::string& phone,const std::string& password,  \
+    //注册--只可手机号注册
+    User(const std::string& phone,const std::string& password,  \
         const std::string& user_id,const std::string& nickname)
     :__phone(phone),__password(password),   \
      __user_id(user_id),__nickname(nickname) {}
+    User(){}
 
     std::string user_id(){return __user_id;}
+    void user_id(const std::string& value){ __user_id = value;}
 
     std::string phone(){return __phone;}
     void phone(const std::string& value){__phone = value;}
@@ -29,7 +34,7 @@ public:
 
     std::string signature(){
         if(!__signature) 
-            return nullptr;
+            return std::string();
         return *__signature;
     }
     void signature(const std::string& value){__signature = value;}
@@ -38,18 +43,20 @@ public:
     void avatar_id(const std::string& value){__avatar_id = value;}
 
 private:
+
+private:
     friend class odb::access;
 
     #pragma db id auto
     unsigned long __id;
 
     #pragma db unique index type("varchar(128)")  //comment("用户id 即用户名可用于登录")
-    const std::string __user_id;//用户id 即用户名可用于登录,不可修改且唯一
+    std::string __user_id;//用户id 即用户名可用于登录,可修改且唯一
 
     #pragma db unique index type("char(11)") //comment("绑定的手机号码")
     std::string __phone;        //只采取手机号注册
     //使用手机号注册后,同时需要设置密码
-    //用户名采取如qq号来随机生成,
+    //
     //后续可添加换绑手机号功能
 
     #pragma db type("varchar(128)") //comment("用户密码")
@@ -58,7 +65,7 @@ private:
     //手机号额外验证码登录
 
     #pragma db type("varchar(128)")  //comment("用户昵称,采用初始时随机生成")
-    std::string __nickname;     //新注册用户采取随机昵称,不可用于登录
+    std::string __nickname;     //不可用于登录
 
     #pragma db type("varchar(128)") //comment("用户签名")
     odb::nullable<std::string> __signature;//用户签名
@@ -74,8 +81,7 @@ private:
 
 };
 //odb -d mysql --generate-query --generate-schema --profile boost/date-time \
-//    --schema-dir ./schema_output \
-//    --query-dir ./query_output \
 //     user.hxx
+}
 
 #endif

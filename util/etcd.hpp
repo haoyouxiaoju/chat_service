@@ -8,7 +8,7 @@
 
 #include "logger.hpp"
 
-namespace util{
+namespace chat_im::util{
 
 //注册服务
 class Registry{

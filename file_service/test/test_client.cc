@@ -18,6 +18,7 @@ DEFINE_string(etcd_host, "http://127.0.0.1:2379", "服务注册中心地址");
 DEFINE_string(base_service, "/service", "服务监控根目录");
 DEFINE_string(file_service, "/service/file_service", "服务监控根目录");
 
+namespace util = chat_im::util;
 
 util::ServiceChannel::ChannelPtr channel;
 std::string single_file_id;

@@ -22,16 +22,16 @@ DEFINE_string(speech_service, "/service/speech_service", "服务监控根目录"
 int main(int argc, char *argv[])
 {
     google::ParseCommandLineFlags(&argc, &argv, true);
-    util::__init_logger__(FLAGS_run_mode, FLAGS_log_file, FLAGS_log_level);
+    chat_im::util::__init_logger__(FLAGS_run_mode, FLAGS_log_file, FLAGS_log_level);
 
     
     //1. 先构造Rpc信道管理对象
-    auto sm = std::make_shared<util::ServiceChannelManager>();
+    auto sm = std::make_shared<chat_im::util::ServiceChannelManager>();
     sm->declared(FLAGS_speech_service);
-    auto put_cb = std::bind(&util::ServiceChannelManager::onServiceOnline, sm.get(), std::placeholders::_1, std::placeholders::_2);
-    auto del_cb = std::bind(&util::ServiceChannelManager::onServiceOffline, sm.get(), std::placeholders::_1, std::placeholders::_2);
+    auto put_cb = std::bind(&chat_im::util::ServiceChannelManager::onServiceOnline, sm.get(), std::placeholders::_1, std::placeholders::_2);
+    auto del_cb = std::bind(&chat_im::util::ServiceChannelManager::onServiceOffline, sm.get(), std::placeholders::_1, std::placeholders::_2);
     //2. 构造服务发现对象
-    util::Discovery::ptr dclient = std::make_shared<util::Discovery>(FLAGS_etcd_host, FLAGS_base_service, put_cb, del_cb);
+    chat_im::util::Discovery::ptr dclient = std::make_shared<chat_im::util::Discovery>(FLAGS_etcd_host, FLAGS_base_service, put_cb, del_cb);
     
     //3. 通过Rpc信道管理对象，获取提供Echo服务的信道
     auto channel = sm->choose(FLAGS_speech_service);

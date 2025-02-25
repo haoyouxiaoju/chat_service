@@ -34,7 +34,7 @@ public:
         brpc::ClosureGuard guard(done);
 
         std::string file_body;
-        bool status = util::readFile(__base_filepath+request->file_id(),file_body);
+        bool status = chat_im::util::readFile(__base_filepath+request->file_id(),file_body);
         response->set_request_id(request->request_id());
         if(status == false){
             ERROR("{}请求获取单文件{}失败",request->request_id(),request->file_id());
@@ -71,7 +71,7 @@ public:
             std::string file_name = __base_filepath+file_id;
             
             std::string file_body;
-            bool status = util::readFile(file_name, file_body);
+            bool status = chat_im::util::readFile(file_name, file_body);
             if (status == false){
                 ERROR("{} 读取文件数据失败！", request->request_id());
                 response->set_success(false);
@@ -103,9 +103,9 @@ public:
 
         response->set_request_id(request->request_id());
 
-        std::string file_id = util::uuid();
+        std::string file_id = chat_im::util::uuid();
         std::string file_name = __base_filepath+file_id;
-        bool status = util::writeFile(file_name,request->file_data().file_content());
+        bool status = chat_im::util::writeFile(file_name,request->file_data().file_content());
         if(status == false){
             ERROR("上传文件请求{}:写入失败",request->request_id());
             response->set_success(false);
@@ -132,9 +132,9 @@ public:
         response->set_request_id(request->request_id());
         int _files_size = request->file_data().size();
         for(int i=0;i<_files_size;++i){
-            std::string file_id = util::uuid();
+            std::string file_id = chat_im::util::uuid();
             std::string file_name = __base_filepath + file_id;
-            bool status = util::writeFile(file_name,request->file_data(i).file_content());
+            bool status = chat_im::util::writeFile(file_name,request->file_data(i).file_content());
             if(status == false ){
                 ERROR("上传多个文件请求{}:写入失败", request->request_id());
                 response->set_success(false);
@@ -161,7 +161,7 @@ private:
 class FileService{
 public:
     using ptr = std::shared_ptr<FileService>;
-    FileService(const util::Registry::ptr &reg_client,const std::shared_ptr<brpc::Server>& rpc_service)
+    FileService(const chat_im::util::Registry::ptr &reg_client,const std::shared_ptr<brpc::Server>& rpc_service)
         :__reg_client(reg_client),__rpc_service(rpc_service)
     {}
     ~FileService(){}
@@ -172,7 +172,7 @@ public:
 
 
 private:
-    util::Registry::ptr __reg_client;
+    chat_im::util::Registry::ptr __reg_client;
     std::shared_ptr<brpc::Server> __rpc_service;
 };
 
@@ -182,7 +182,7 @@ public:
     void make_regClient(const std::string &reg_host,    \
                         const std::string& service_name,     \
                         const std::string& access_host){
-        __reg_client =std::make_shared<util::Registry>(reg_host);
+        __reg_client =std::make_shared<chat_im::util::Registry>(reg_host);
         __reg_client->registry(service_name,access_host);
     }
     void make_rpcService(uint16_t port,int32_t timeout,uint8_t num_threads,const std::string& base_path){
@@ -221,7 +221,7 @@ public:
     }
 
 private:
-    util::Registry::ptr __reg_client;
+    chat_im::util::Registry::ptr __reg_client;
     std::shared_ptr<brpc::Server> __rpc_service;
 
 };

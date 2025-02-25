@@ -23,10 +23,11 @@ DEFINE_string(app_id,"6281148","");
 DEFINE_string(aip_key,"S8HFyKKZrbQUJ4lxVn9bYEWR","");
 DEFINE_string(secret_key,"SeOp6UsVKE63SlKxipdRHC6ZLROC7lqh","");
 
+
 int main(int argc,char* argv[]){
     google::ParseCommandLineFlags(&argc,&argv,true);
 
-    util::__init_logger__(FLAGS_logger_mode,FLAGS_logger_outFile,FLAGS_logger_level);
+    chat_im::util::__init_logger__(FLAGS_logger_mode,FLAGS_logger_outFile,FLAGS_logger_level);
 
     logging::LoggingSettings stt;
     stt.logging_dest=logging::LoggingDestination::LOG_TO_NONE;

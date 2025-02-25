@@ -4,7 +4,7 @@
 #include <brpc/channel.h>
 #include "logger.hpp"
 
-namespace util{
+namespace chat_im::util{
 
 
 class ServiceChannel{

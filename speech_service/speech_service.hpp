@@ -9,9 +9,12 @@
 #include "logger.hpp"
 #include "speech.pb.h"
 
+
+
+
 class SpeechServiceImpl: public chat_im::SpeechService{
 public:
-    SpeechServiceImpl(const util::asrClient::ptr& client):__asr_client(client){}
+    SpeechServiceImpl(const chat_im::util::asrClient::ptr& client):__asr_client(client){}
     ~SpeechServiceImpl(){}
     void SpeechRecognition(google::protobuf::RpcController *controller,
                            const ::chat_im::SpeechRecognitionReq *request,
@@ -34,14 +37,14 @@ public:
     }     
 
 private:
-    util::asrClient::ptr __asr_client;
+    chat_im::util::asrClient::ptr __asr_client;
 };
 
 class SpeechService{
 public:
     using ptr = std::shared_ptr<SpeechService>;
-    SpeechService(const util::asrClient::ptr& asr_client,  \
-            const util::Registry::ptr& reg_client,          \
+    SpeechService(const chat_im::util::asrClient::ptr& asr_client,  \
+            const chat_im::util::Registry::ptr& reg_client,          \
             std::shared_ptr<brpc::Server> rpc_service)
             :__asr_client(asr_client),  \
              __reg_client(reg_client),  \
@@ -52,8 +55,8 @@ public:
     }
 
 private:
-    util::asrClient::ptr __asr_client;
-    util::Registry::ptr __reg_client;
+    chat_im::util::asrClient::ptr __asr_client;
+    chat_im::util::Registry::ptr __reg_client;
     std::shared_ptr<brpc::Server> __rpc_service;
 
 };
@@ -63,12 +66,12 @@ public:
     void make_asrClient(const std::string& app_id,    \
                 const std::string& api_key, \
                 const std::string& secret_key){
-        __asr_client = std::make_shared<util::asrClient>(app_id,api_key,secret_key);
+        __asr_client = std::make_shared<chat_im::util::asrClient>(app_id,api_key,secret_key);
     }
     void make_regClient(const std::string &reg_host,    \
                         const std::string& service_name,     \
                         const std::string& access_host){
-        __reg_client =std::make_shared<util::Registry>(reg_host);
+        __reg_client =std::make_shared<chat_im::util::Registry>(reg_host);
         __reg_client->registry(service_name,access_host);
     }
     void make_rpcService(uint16_t port,int32_t timeout,uint8_t num_threads){
@@ -118,8 +121,8 @@ public:
 
 
 private:
-    util::asrClient::ptr __asr_client;
-    util::Registry::ptr __reg_client;
+    chat_im::util::asrClient::ptr __asr_client;
+    chat_im::util::Registry::ptr __reg_client;
     std::shared_ptr<brpc::Server> __rpc_service;
 };
 

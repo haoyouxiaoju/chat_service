@@ -10,7 +10,7 @@
 
 #include "logger.hpp"
 
-namespace util{
+namespace chat_im::util{
 
 //返回一个uuid
 std::string uuid() {
@@ -32,6 +32,7 @@ std::string uuid() {
     ss << std::setw(4) << std::setfill('0') << std::hex << tmp;
     return ss.str();
 }
+
 
 //
 //读取文件  

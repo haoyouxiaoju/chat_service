@@ -9,7 +9,7 @@
 
 #include "logger.hpp"
 
-namespace util{
+namespace chat_im::util{
 
 
 //
@@ -48,8 +48,8 @@ bool unSerivlize(const std::string& body ,Json::Value& value){
 //      索引
 class ESIndex{
 public:
-    ESIndex(const std::string &name,const std::string& type,    \
-                    std::shared_ptr<elasticlient::Client>& client):
+    ESIndex(std::shared_ptr<elasticlient::Client>& client,    \
+                  const std::string &name,const std::string& type="_doc"):
                 __name(name),__type(type),__client(client)
                 {
                     //settings 的设置
@@ -118,7 +118,7 @@ private:
 
 class ESInsert{
 public:
-    ESInsert(const std::string& name,const std::string& type,std::shared_ptr<elasticlient::Client> client):
+    ESInsert(std::shared_ptr<elasticlient::Client> client,const std::string& name,const std::string& type="_doc"):
         __name(name),__type(type),__client(client){}
     ESInsert& append(const std::string& key,const std::string& value){
         __item[key] = value;
@@ -154,7 +154,7 @@ private:
 
 class ESRemove{
 public:
-    ESRemove(const std::string& name,const std::string& type,std::shared_ptr<elasticlient::Client> client):
+    ESRemove(std::shared_ptr<elasticlient::Client> client,const std::string& name,const std::string& type="_doc"):
         __name(name), __type(type), __client(client){}
     
     bool remove(const std::string& id){
@@ -180,7 +180,7 @@ private:
 
 class ESSearch{
 public:
-    ESSearch(const std::string& name,const std::string& type,std::shared_ptr<elasticlient::Client> client):
+    ESSearch(std::shared_ptr<elasticlient::Client> client,const std::string& name,const std::string& type="_doc"):
         __name(name),__type(type),__client(client){}
     ESSearch& add_must_not_term(const std::string& key,const std::vector<std::string> values){
         Json::Value item;

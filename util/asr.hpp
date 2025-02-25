@@ -10,7 +10,7 @@ static const std::string aip_app_id = "6281148";
 static const std::string aip_api_key = "S8HFyKKZrbQUJ4lxVn9bYEWR";
 static const std::string aip_secret_key = "SeOp6UsVKE63SlKxipdRHC6ZLROC7lqh";
 
-namespace util{
+namespace chat_im::util{
 class asrClient{
 public:
     using ptr = std::shared_ptr<asrClient>;
