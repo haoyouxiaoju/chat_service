@@ -4,6 +4,7 @@
 #include "icsearch.hpp"
 #include "logger.hpp"
 #include "user.hxx"
+#include "user-odb.hxx"
 
 #include <iostream>
 
@@ -50,6 +51,9 @@ public:
     }
 
 //  添加数据
+    bool append(const std::shared_ptr<chat_im::User>& user){
+        return append(user->nickname(),user->user_id(),user->phone(),user->signature(),user->avatar_id());
+    }
     bool append(const std::string &nickname,
            const std::string &user_id,
            const std::string &phone,

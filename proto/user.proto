@@ -32,7 +32,7 @@ message UserLoginReq{
 }
 message UserLoginRsp{
     string request_id =1;       //请求id
-    bool sucess =2;             //
+    bool success =2;             //
     optional string errmsg=3;             //返回错误信息
     string login_session_id=4;  //登录会话id
 }
@@ -45,9 +45,9 @@ message PhoneVerifyCodeReq {
 }
 message PhoneVerifyCodeRsp {
     string request_id =1;       //请求id
-    bool sucess =2;             //
-    string errmsg=3;            //返回错误信息
-    string verify_code_id=4;    //验证码id
+    bool success =2;             //
+    optional string errmsg=3;            //返回错误信息
+    optional string verify_code_id=4;    //验证码id
 }
 
 
@@ -62,7 +62,7 @@ message PhoneRegisterReq {
 }
 message PhoneRegisterRsp{
     string request_id =1;        //请求id
-    bool sucess =2;              //
+    bool success =2;              //
     optional string user_id=3;   //用户名       
     optional string errmsg=4;             //返回错误信息
 }
@@ -78,8 +78,8 @@ message PhoneLoginReq {
 message PhoneLoginRsp{
     string request_id=1;         //请求id
     bool success =2;             //
-    string errmsg=3;             //返回错误信息
-    string login_session_id=4;   //登录会话id
+    optional string errmsg=3;             //返回错误信息
+    optional string login_session_id=4;   //登录会话id
 }
 
 //
@@ -109,7 +109,7 @@ message GetMultiUserInfoRsp{
     string request_id =1;
     bool success =2;
     optional string errmsg=3;
-    optional map<string,UserInfo> users_info=4;
+    map<string,UserInfo> users_info=4;
 }
 
 //
@@ -123,7 +123,7 @@ message SetUserAvatarReq{
 message SetUserAvatarRsp{
     string request_id =1;
     bool success=2;
-    string errmsg=3;
+    optional string errmsg=3;
 }
 
 //
@@ -137,7 +137,7 @@ message SetUserNicknameReq{
 message SetUserNicknameRsp{
     string request_id =1;
     bool success =2;
-    string errmsg=3;
+    optional string errmsg=3;
 }
 
 //
@@ -151,7 +151,7 @@ message SetUserDescriptionReq{
 message SetUserDescriptionRsp{
     string request_id =1;
     bool success=2;
-    string errmsg=3;   
+    optional string errmsg=3;   
 }
 
 //
@@ -167,7 +167,7 @@ message SetUserPhoneNumberReq{
 message SetUserPhoneNumberRsp{
     string request_id =1;
     bool success =2;
-    string errmsg=3;
+    optional string errmsg=3;
 }
 
 

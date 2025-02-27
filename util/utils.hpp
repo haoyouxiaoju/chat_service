@@ -33,6 +33,18 @@ std::string uuid() {
     return ss.str();
 }
 
+std::string verify_code(){
+    std::random_device rd;//实例化设备随机数对象-用于生成设备随机数
+    std::mt19937 generator(rd());//以设备随机数为种子，实例化伪随机数对象
+    std::uniform_int_distribution<int> distribution(0,9); //限定数据范围
+
+    std::stringstream ss;
+    for (int i = 0; i < 4; i++) {
+        ss << distribution(generator);
+    }
+    return ss.str();
+}
+
 
 //
 //读取文件  

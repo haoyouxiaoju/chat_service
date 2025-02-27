@@ -50,10 +50,10 @@ private:
     #pragma db id auto
     unsigned long __id;
 
-    #pragma db unique index type("varchar(128)")  //comment("用户id 即用户名可用于登录")
+    #pragma db unique index unique type("varchar(128)")  //comment("用户id 即用户名可用于登录")
     std::string __user_id;//用户id 即用户名可用于登录,可修改且唯一
 
-    #pragma db unique index type("char(11)") //comment("绑定的手机号码")
+    #pragma db unique index unique type("char(11)") //comment("绑定的手机号码")
     std::string __phone;        //只采取手机号注册
     //使用手机号注册后,同时需要设置密码
     //
