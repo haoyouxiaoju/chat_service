@@ -1,8 +1,8 @@
 #ifndef USER_HXX
 #define USER_HXX
 
-#include <odb/core.hxx>
 #include <odb/nullable.hxx>
+#include <odb/core.hxx>
 
 #include <string>
 

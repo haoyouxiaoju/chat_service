@@ -46,13 +46,13 @@ foreach(odb_file ${odb_files})
         add_custom_command(
             PRE_BUILD
             COMMAND odb
-            ARGS -d mysql --generate-query --generate-schema --profile boost/date-try_compile
+            ARGS -d mysql --generate-query --std c++11 --generate-schema --profile boost/date-time ${odb_path}/${odb_file}
             DEPENDS ${odb_path}/${odb_file}
-            OUTPUT ${CMAKE_BINARY_DIR}/${odb_cxx} ${CMAKE_BINARY_DIR}/${odb_hxx} ${CMAKE_BINARY_DIR}/${odb_ixx} ${CMAKE_BINARY_DIR}/${odb_sql}
-            COMMENT "生成数据库脚本:"${odb_sql}",以及"${odb_hxx}"、"${odb_cxx}"、"${odb_ixx}
+            OUTPUT ${CMAKE_BINARY_DIR}/${odb_cxx} 
+            COMMENT "生成"${odb_cxx}
         )
     endif()
-    list(APPEND pdb ${CMAKE_CURRENT_BINARY_DIR}/${odb_cxx})
+    list(APPEND odb_src ${CMAKE_CURRENT_BINARY_DIR}/${odb_cxx})
 endforeach()
 
 
@@ -67,22 +67,28 @@ message(${project_src})
 add_executable(${project_name} ${project_src} ${pb_src} ${odb_src})
 
 # 设置需要连接的库
-target_link_libraries(${project_name} -lgflags -lspdlog -lfmt -lbrpc -lssl -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
+target_link_libraries(${project_name} -lgflags -lspdlog -lfmt -lbrpc -lssl  
+                 -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl  
+                 -lodb-mysql -lodb -lodb-boost      
+                 -lalibabacloud-sdk-core -lcpr -lelasticlient
+                 -lhiredis -lredis++
+                  /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
 
 
-# test
-set(test_project test_client)
-project(${test_project})
-set(test_files "")
-list(APPEND test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/test_client.cc)
-add_executable(${test_project} ${test_files} ${pb_src})
-target_link_libraries(${test_project} -lgtest -lgflags -lspdlog -lfmt -lbrpc -lssl -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
-
+## test
+#set(test_project test_client)
+#project(${test_project})
+#set(test_files "")
+#list(APPEND test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/test_client.cc)
+#add_executable(${test_project} ${test_files} ${pb_src})
+#target_link_libraries(${test_project} -lgtest -lgflags -lspdlog -lfmt -lbrpc -lssl -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
+#
 
 
 #头文件搜索路径
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../install/include/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../util/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../odb/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 

@@ -29,10 +29,10 @@ int main(int argc,char* argv[]){
 
     chat_im::util::__init_logger__(FLAGS_logger_mode,FLAGS_logger_outFile,FLAGS_logger_level);
 
-    logging::LoggingSettings stt;
-    stt.logging_dest=logging::LoggingDestination::LOG_TO_NONE;
-    logging::InitLogging(stt);
-    SpeechServiceBuilder builder;
+    // logging::LoggingSettings stt;
+    // stt.logging_dest=logging::LoggingDestination::LOG_TO_NONE;
+    // logging::InitLogging(stt);
+    // SpeechServiceBuilder builder;
     builder.make_asrClient(FLAGS_app_id,FLAGS_aip_key,FLAGS_secret_key);
     builder.make_regClient(FLAGS_etcd_host,FLAGS_base_service+FLAGS_instance_name,FLAGS_instance_host);
     builder.make_rpcService(FLAGS_lister_port,FLAGS_rpc_timeout,FLAGS_rpc_threads_num);

@@ -28,6 +28,8 @@ namespace chat_im::util{
 
         __g_logger->set_pattern("%H:%M:%S [%n][%l]%v");
 
+        
+
     }
 }
 

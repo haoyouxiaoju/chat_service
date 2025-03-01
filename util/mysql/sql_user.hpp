@@ -25,7 +25,7 @@ public:
     UserTable(const std::shared_ptr<odb::core::database>& db):
         __db(db){}
 
-    bool insert(const User& user){
+    bool insert(User& user){
         try{
             odb::transaction trans(__db->begin());
             __db->persist(user);
@@ -41,7 +41,7 @@ public:
         return this->insert(*user);
     }
 
-    bool update(const User& user){
+    bool update(User& user){
         try{
             odb::transaction trans(__db->begin());
             __db->update(user);

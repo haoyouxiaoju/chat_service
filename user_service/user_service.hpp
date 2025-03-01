@@ -1,6 +1,11 @@
 #ifndef USER_SERVICE_HPP
 #define USER_SERVICE_HPP
 
+#include <regex>
+#include <functional>
+
+#include <brpc/server.h>
+#include <butil/logging.h>
 
 #include "etcd.hpp"
 #include "channel.hpp"
@@ -17,17 +22,29 @@
 #include "user.pb.h"
 #include "file.pb.h"
 
-#include <regex>
-#include <functional>
 
-const std::string PHONE_NUMBER_RULE = "\d{11}";
-const std::string NICKNAME_RULE = "";
-const std::string VERIFY_CODE_RULE = "";
+
+const std::string PHONE_NUMBER_RULE = "1[3-9]\\d{9}";
+const std::string NICKNAME_RULE = "[^a-zA-Z0-9\u4e00-\u9fa5]";
+const std::string VERIFY_CODE_RULE = "[0-9]{4}";
 const std::string DEFALUT_AVATAR_ID ="";
 
 class UserServiceImpl:public chat_im::UserService {
 public:
-    UserServiceImpl(){}
+    UserServiceImpl(
+                    const std::string& file_service_name,
+                    const chat_im::util::Code::ptr & code_manager,
+                    const chat_im::util::Status::ptr& status_manager,
+                    const chat_im::util::Session::ptr& session_manager,
+                    const chat_im::util::UserTable::ptr& user_manager,
+                    const chat_im::util::ESUser::ptr& esUser_manager,
+                    const chat_im::util::ServiceChannelManager::ptr& channel_manager,
+                    const chat_im::util::DMSClient::ptr& dms_manager
+    ):__code_manager(code_manager),__status_manager(status_manager),  \
+      __session_manager(session_manager), __user_manager(user_manager),\
+      __esUser_manager(esUser_manager),__channel_manager(channel_manager), \
+      __dms_manager(dms_manager),__file_service_name(file_service_name)  
+    {}
     ~UserServiceImpl(){}
 
     
@@ -513,7 +530,7 @@ public:
                  });
 
                 //检查昵称的合法性
-                bool isOk = std::regex_match(nickname,std::regex(NICKNAME_RULE));
+                bool isOk = !std::regex_match(nickname,std::regex(NICKNAME_RULE));
                 if(!isOk){
                   //
                   //
@@ -694,11 +711,17 @@ private:
       brpc::Controller cntl;
       //远程调用
       stub.GetSingleFile(&cntl,&req,&rsp,nullptr);
+
+  if (cntl.Failed() == true ) {
+        ERROR("文件子服务调用失败：{}！",cntl.ErrorText());
+        return false;
+    }
+
       return true;
     }
     // 此处用于获取多个头像二进制数据
-    bool __downloadFiles(const std::string& request_id,\ 
-                         const std::vector<std::string>& files_id,\
+    bool __downloadFiles(const std::string& request_id, 
+                         const std::vector<std::string>& files_id,
                          chat_im::GetMultiFileRsp& rsp){
       
       brpc::Channel* channel = __channel_manager->choose(__file_service_name).get();
@@ -717,6 +740,10 @@ private:
 
       brpc::Controller cntl;
       stub.GetMultiFile(&cntl,&req,&rsp,nullptr);
+        if (cntl.Failed() == true ) {
+        ERROR("文件子服务调用失败：{}！",cntl.ErrorText());
+        return false;
+    }
       return true;
     }
 
@@ -725,13 +752,13 @@ private:
                        const std::string& user_id,  \
                        const std::string& file_content,   \
                        chat_im::PutSingleFileRsp& rsp){
-      brpc::Channel* channel = __channel_manager->choose(__file_service_name).get();
+      chat_im::util::ServiceChannel::ChannelPtr channel = __channel_manager->choose(__file_service_name);
       if(channel == nullptr){
         //
-        ERROR("未获取到文件服务channel");
+        ERROR("未获取到文件服务");
         return false;
       }              
-      chat_im::FileService_Stub stub(channel);
+      chat_im::FileService_Stub stub(channel.get());
       //构建文件上传请求
       chat_im::PutSingleFileReq req;
       req.set_request_id(request_id);
@@ -743,6 +770,11 @@ private:
       
       brpc::Controller cntl;
       stub.PutSingleFile(&cntl,&req,&rsp,nullptr);
+
+      if (cntl.Failed() == true ) {
+        ERROR("文件子服务调用失败：{}！",cntl.ErrorText());
+        return false;
+    }
       return true;
 
     }
@@ -757,24 +789,205 @@ private:
     std::string __file_service_name;
     chat_im::util::ServiceChannelManager::ptr __channel_manager;
     chat_im::util::DMSClient::ptr __dms_manager;
-
-    
+  
 
 };
 
 class UserService{
 public:
+  using ptr = std::shared_ptr<UserService>;
+  UserService(const std::shared_ptr<brpc::Server>& service,
+              const chat_im::util::Discovery::ptr& disc,
+              const chat_im::util::Registry::ptr& reg
+  ):
+    __user_service(service),__reg_client(reg),__discovery(disc){}
+  ~UserService(){}
+
+
+  void start(){
+    __user_service->RunUntilAskedToQuit();
+  }
 
 private:
 
+  chat_im::util::Registry::ptr __reg_client;
+  std::shared_ptr<brpc::Server> __user_service;
+  chat_im::util::Discovery::ptr __discovery;
 
 };
 
-class IserServiceBuilder{
+class UserServiceBuilder{
 public:
+    UserServiceBuilder() 
+    {}
+    ~UserServiceBuilder(){}
+
+    //创建redis链接,构建验证码\会话\用户状态的redis管理类
+    void makeRedisManager(
+      const std::string& host,
+      int port,
+      int db,
+      bool keep_alive
+    ){
+      //创建redis链接
+      std::shared_ptr<sw::redis::Redis>     \
+        redis_connection =  chat_im::util::RedisClientFactory::create(host,port,db,keep_alive);
+      
+      //构建验证码\会话\用户状态的redis管理类
+      __code_manager = std::make_shared<chat_im::util::Code>(chat_im::util::Code(redis_connection));
+      __status_manager = std::make_shared<chat_im::util::Status>(chat_im::util::Status(redis_connection));
+      __session_manager = std::make_shared<chat_im::util::Session>(chat_im::util::Session(redis_connection));
+
+    }
+    
+      //创建mysql的链接,构建mysql用户管理对象
+    void makeUserManager(
+        const std::string& user,
+        const std::string& password,
+        const std::string& host,
+        const std::string& db,
+        const std::string& socket,
+        int port,
+        int conn_pool_count
+    ){
+      //创建mysql的链接
+      std::shared_ptr<odb::core::database>  \
+        database_connection (chat_im::util::ODBFactory::create(user,password,host,db,socket,port,conn_pool_count));
+      
+      //构建mysql用户管理对象
+      __user_manager = std::make_shared<chat_im::util::UserTable>(chat_im::util::UserTable(database_connection));
+    
+    
+    }
+
+    //创建es服务器连接,构建es服务用户管理对象
+    void makeESUserManager(const std::vector<std::string>& es_host){
+      
+      std::shared_ptr<elasticlient::Client> es_connection (chat_im::util::ESClientFactory::create(es_host));
+      __esUser_manager = std::make_shared<chat_im::util::ESUser>(es_connection);
+    }
+    
+    //构建ServiceChannel管理对象,关注文件服务,同时去寻找服务
+    void makeChannelManager(
+      const std::string& etcd_host,
+      const std::string& base_service,
+      const std::string& file_service_name
+    ){
+      __file_service_name =file_service_name;
+      __channel_manager = std::make_shared<chat_im::util::ServiceChannelManager>();
+      __channel_manager->declared(__file_service_name);
+
+      std::function<void(const std::string&,const std::string&)>    \
+        put_cb = std::bind(&chat_im::util::ServiceChannelManager::onServiceOnline,__channel_manager.get(),std::placeholders::_1,std::placeholders::_2);
+      std::function<void(const std::string&,const std::string&)>    \
+        del_cb = std::bind(&chat_im::util::ServiceChannelManager::onServiceOffline,__channel_manager.get(),std::placeholders::_1,std::placeholders::_2);
+      
+      __disc = std::make_shared<chat_im::util::Discovery>(etcd_host,base_service,put_cb,del_cb);
+
+    }
+
+    //构建DMS服务
+    void makeDMSManager(
+      const std::string& dms_key_id,
+      const std::string& dms_key_secret
+    ){
+      __dms_manager = std::make_shared<chat_im::util::DMSClient>(dms_key_id,dms_key_secret);
+    }
+
+    void make_regClient(const std::string &reg_host,    \
+                        const std::string& service_name,     \
+                        const std::string& access_host){
+        __reg_client =std::make_shared<chat_im::util::Registry>(reg_host);
+        __reg_client->registry(service_name,access_host);
+    }
+
+    void make_rpc_service(uint16_t port,int32_t timeout,uint8_t num_threads){
+      if(!__code_manager||!__status_manager||!__session_manager){
+        ERROR("redis管理对象未构建");
+        abort();
+
+      }
+      if(!__user_manager){
+        ERROR("mysql数据库管理对象未构建");
+        abort();
+
+      }
+      if(!__esUser_manager){
+        ERROR("es服务管理对象未构建");
+        abort();
+
+      }
+      if(!__channel_manager){
+        ERROR("serviceChannel管理对象未构建");
+        abort();
+
+      }
+      if(!__dms_manager){
+        ERROR("短信服务管理对象未构建");
+        abort();
+
+      }
+
+      __rpc_service = std::make_shared<brpc::Server>();
+
+      UserServiceImpl* impl =new UserServiceImpl(
+        __file_service_name,
+        __code_manager,
+        __status_manager,
+        __session_manager,
+        __user_manager,
+        __esUser_manager,
+        __channel_manager,
+        __dms_manager
+      );
+
+      bool isOk = __rpc_service->AddService(impl,brpc::ServiceOwnership::SERVER_OWNS_SERVICE);
+      if(isOk == -1){
+        ERROR("rpc服务添加失败");
+        abort();
+      }
+
+      brpc::ServerOptions opt;
+      opt.idle_timeout_sec = timeout;
+      opt.num_threads= num_threads;
+      isOk = __rpc_service->Start(port,&opt);
+      if(isOk == -1){
+          ERROR("rpc服务启动失败");
+          abort();
+      }      
+    }
+    
+    UserService::ptr build(){
+      if(!__disc){
+        ERROR("未初始化服务发现模块！");
+        abort();
+      }
+      if(!__rpc_service){
+        ERROR("未初始化rpc服务器模块");
+        abort();
+      }
+      if(!__reg_client){
+        ERROR("未初始化服务注册模块");
+        abort();
+      }
+      
+      return std::make_shared<UserService>(__rpc_service,__disc,__reg_client);
+    }
 
 
 private:
+    chat_im::util::Code::ptr __code_manager;
+    chat_im::util::Status::ptr __status_manager;
+    chat_im::util::Session::ptr __session_manager;
+    chat_im::util::UserTable::ptr __user_manager;
+    chat_im::util::ESUser::ptr __esUser_manager;
+    std::string __file_service_name;
+    chat_im::util::ServiceChannelManager::ptr __channel_manager;
+    chat_im::util::DMSClient::ptr __dms_manager;
+    chat_im::util::Discovery::ptr __disc;
+  std::shared_ptr<brpc::Server> __rpc_service;
+    chat_im::util::Registry::ptr __reg_client;
+
 };
 
 
