@@ -71,6 +71,7 @@ public:
             std::string file_name = __base_filepath+file_id;
             
             std::string file_body;
+            DEBUG("开始读取文件{}",file_name);
             bool status = chat_im::util::readFile(file_name, file_body);
             if (status == false){
                 ERROR("{} 读取文件数据失败！", request->request_id());
@@ -105,6 +106,8 @@ public:
 
         std::string file_id = chat_im::util::uuid();
         std::string file_name = __base_filepath+file_id;
+	INFO("{}-name{}-id{}",request->file_data().file_content(),request->file_data().file_name(),request->request_id());
+	INFO("{}size",sizeof(*request));
         bool status = chat_im::util::writeFile(file_name,request->file_data().file_content());
         if(status == false){
             ERROR("上传文件请求{}:写入失败",request->request_id());

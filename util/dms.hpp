@@ -48,7 +48,7 @@ namespace chat_im::util
             auto response = __client->commonResponse(request);
 
             if(!response.isSuccess()){
-                ERROR("短信发送-{}-失败",phone);
+                ERROR("短信发送-{}-失败原因:{}",phone,response.error().errorMessage().c_str());
                 return false;
             }
 

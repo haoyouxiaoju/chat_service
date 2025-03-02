@@ -143,6 +143,7 @@ public:
                 //生成验证码并发送
                 const std::string code = chat_im::util::verify_code();
                 isOk = __dms_manager->send(phone,code);
+                DEBUG("{}验证码{}",phone,code);
 
                 if(!isOk){
                   //
@@ -220,7 +221,7 @@ public:
 
                 //判断手机号是否已经被注册 , 数据库内查询
                 std::shared_ptr<chat_im::User> user(__user_manager->select_by_phone(phone));
-                if(!user){
+                if(user){
                   //
                   //
                   ERROR("请求{}:手机号码已被注册{}",request_id,phone);
@@ -389,8 +390,8 @@ public:
 
                 
                 //获取用户id
-                size_t id_size = request->users_id().size();
-                std::vector<std::string> userId_list(id_size);
+                int id_size = request->users_id_size();
+                std::vector<std::string> userId_list;
                 for(int i=0;i<id_size;++i){
                   userId_list.push_back(request->users_id(i));
                 }
@@ -406,13 +407,15 @@ public:
                } 
 
                //构建头像id数组
-               std::vector<std::string> avatarId_list(id_size);
+               std::vector<std::string> avatarId_list;
                for(int i=0;i<id_size;++i){
+                DEBUG("用户id{}-头像id{}",userData_list[i].user_id(),userData_list[i].avatar_id());
                 avatarId_list.push_back(userData_list[i].avatar_id());
                }
 
                //获取头像的二进制数据
                chat_im::GetMultiFileRsp rsp;
+               DEBUG("开始获取头像数据");
                bool isOk = __downloadFiles(request_id,avatarId_list,rsp);
                if(!isOk){
                   ERROR("本地下载头像数据失败");
@@ -648,7 +651,7 @@ public:
                  });
 
                  //获取reids中的验证码并判断
-                std::string verify_code_redis = *(__code_manager->code(verify_code_id));
+                const std::string verify_code_redis = *(__code_manager->code(verify_code_id));
 
                 if(verify_code_redis.compare(verify_code) != 0){
                   //
@@ -735,7 +738,8 @@ private:
       chat_im::GetMultiFileReq req;
       req.set_request_id(request_id);
       for(int i=0;i<files_id.size();++i){
-        req.set_file_id_list(i,files_id[i]);
+        DEBUG("头像id{}",files_id[i]);
+        req.add_file_id_list(files_id[i]);
       }
 
       brpc::Controller cntl;

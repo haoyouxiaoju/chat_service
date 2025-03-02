@@ -20,8 +20,8 @@ DEFINE_string(es_host, "http://127.0.0.1:9200/", "ES搜索引擎服务器URL");
 
 DEFINE_string(mysql_host, "127.0.0.1", "Mysql服务器访问地址");
 DEFINE_string(mysql_user, "root", "Mysql服务器访问用户名");
-DEFINE_string(mysql_pswd, "123456", "Mysql服务器访问密码");
-DEFINE_string(mysql_db, "bite_im", "Mysql默认库名称");
+DEFINE_string(mysql_pswd, "Hlb030509!", "Mysql服务器访问密码");
+DEFINE_string(mysql_db, "chat_im", "Mysql默认库名称");
 DEFINE_string(mysql_cset, "utf8", "Mysql客户端字符集");
 DEFINE_int32(mysql_port, 0, "Mysql服务器访问端口");
 DEFINE_int32(mysql_pool_count, 4, "Mysql连接池最大连接数量");
@@ -33,8 +33,8 @@ DEFINE_int32(redis_db, 0, "Redis默认库号");
 DEFINE_bool(redis_keep_alive, true, "Redis长连接保活选项");
 
 
-DEFINE_string(dms_key_id, "LTAI5tEAKctuVopadZ6yQs3p", "短信平台密钥ID");
-DEFINE_string(dms_key_secret, "Fr8BsDO07qgopNmV9iKGypEcKEqWeQ2", "短信平台密钥");
+DEFINE_string(dms_key_id, "LTAI5t5i2W6bRj9N3oDhyT1y", "短信平台密钥ID");
+DEFINE_string(dms_key_secret, "TZyxvFGOhNEsD4jWfQVYT46Z5okaT1", "短信平台密钥");
 
 
 int main(int argc,char* argv[]){

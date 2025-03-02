@@ -107,20 +107,27 @@ public:
         }
         std::vector<User> ret;
         try{
-            odb::transaction trans(__db->begin());
             //拼接查询命令 user_id in (id1,id2,id3,...)
+            
+            odb::transaction trans(__db->begin());
             std::stringstream ss;
-            ss<< "user_id in(" ;
+            ss<< "user_id in (" ;
             size_t size = id_list.size();
             for(int i=0;i<size-1 ;++i){
                 ss<<"'"<<id_list[i]<<"',";
             }
             ss<<"'"<<id_list[size-1]<<"')";
             result res(__db->query<User>(ss.str()));
-            for(const auto &e : res ){
-                ret.push_back(e);
-            }
+            for (result::iterator i(res.begin()); i != res.end(); ++i) {
+                ret.push_back(*i);
+            } 
             trans.commit();
+            // for(const auto &e : res ){
+            //     ;
+            //     ret.push_back(e);
+            // }
+            
+            
         }catch(std::exception& e){
             ERROR("用户id批量查询失败:{}",e.what());
         }

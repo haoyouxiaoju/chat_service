@@ -49,6 +49,8 @@ std::string verify_code(){
 //
 //读取文件  
 bool readFile(const std::string& file_path,std::string& body){
+    DEBUG("进入readFile开始读取");
+    DEBUG("读取的文件名{}",file_path);
     std::ifstream file(file_path,std::ios_base::binary | std::ios_base::in);
     if(!file.is_open()){
         ERROR("读取文件{}:文件打开失败.",file_path);
