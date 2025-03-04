@@ -866,7 +866,6 @@ public:
 
     //创建es服务器连接,构建es服务用户管理对象
     void makeESUserManager(const std::vector<std::string>& es_host){
-      
       std::shared_ptr<elasticlient::Client> es_connection (chat_im::util::ESClientFactory::create(es_host));
       __esUser_manager = std::make_shared<chat_im::util::ESUser>(es_connection);
     }

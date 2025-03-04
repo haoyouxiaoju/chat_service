@@ -34,6 +34,14 @@ public:
         brpc::ClosureGuard guard(done);
 
         std::string file_body;
+        // 防止因file_id为空导致程序崩溃需要加一判断
+        if (request->file_id().compare("") == 0)
+        {
+            ERROR("{}请求文件所设置的file_id为空");
+            response->set_success(false);
+            response->set_errmsg("所设置的file_id为空！");
+            return;
+            }
         bool status = chat_im::util::readFile(__base_filepath+request->file_id(),file_body);
         response->set_request_id(request->request_id());
         if(status == false){
@@ -67,7 +75,14 @@ public:
         //获取列表中每一个文件id来读取文件
         response->set_request_id(request->request_id());
         for(int i=0;i<file_size;++i){
+            //防止因file_id为空导致程序崩溃需要加一判断
             std::string file_id = request->file_id_list(i);
+            if(file_id.compare("")==0){
+                ERROR("{}请求文件所设置的file_id为空");
+                response->set_success(false);
+                response->set_errmsg("所设置的file_id为空！");
+                return;
+            }
             std::string file_name = __base_filepath+file_id;
             
             std::string file_body;

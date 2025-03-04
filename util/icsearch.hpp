@@ -204,6 +204,22 @@ public:
 
         return *this;
     }
+    ESSearch& add_must_term(const std::string &key, const std::string &val) {
+        Json::Value field;
+        field[key] = val;
+        Json::Value term;
+        term["term"] = field;
+        __must.append(term);
+        return *this;
+    }
+    ESSearch& add_must_match(const std::string &key, const std::string &val){
+        Json::Value field;
+        field[key] = val;
+        Json::Value match;
+        match["match"] = field;
+        __must.append(match);
+        return *this;
+    }
 
     Json::Value search(){
         Json::Value root;
@@ -254,6 +270,7 @@ private:
     std::string __type;
     Json::Value __must_not_terms;
     Json::Value __should_match;
+    Json::Value __must;
     std::shared_ptr<elasticlient::Client> __client;
 
 };

@@ -3,6 +3,8 @@ syntax = "proto3";
 package chat_im;
 //option cc_generic_services = true;
 
+//protoc --cpp_out=./pb/ --experimental_allow_proto3_optional XXXX.proto
+
 //用户信息结构
 message UserInfo {
     string user_id =1;          //用户Id

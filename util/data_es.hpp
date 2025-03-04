@@ -6,6 +6,9 @@
 #include "user.hxx"
 #include "user-odb.hxx"
 
+#include "message.hxx"
+#include "message-odb.hxx"
+
 #include <iostream>
 
 
@@ -105,12 +108,99 @@ public:
     }
 
 
-
 private:
     std::shared_ptr<elasticlient::Client> __es_client;
 };
 
+class ESMessage{
+public:
+    using ptr = std::shared_ptr<ESMessage>;
+    ESMessage(const std::shared_ptr<elasticlient::Client>& es_client):__es_client(es_client){}
 
+    //创建索引message
+    bool createIndex(){
+        bool ret = ESIndex(__es_client,"message")
+            .append("chat_session_id","standard")
+            .append("message_id","standard")
+            .append("user_id","standard")
+            .append("content")
+            .create();
+        if(!ret){
+            ERROR("ES客户端 创建消息索引失败");
+            return false;
+        }
+        return true;
+    }
+
+    bool append(
+        const std::string& chat_session_id,
+        const std::string& message_id,
+        const std::string& user_id,
+        const std::string& content
+    ){
+        bool ret = ESInsert(__es_client,"message")
+        .append("chat_session_id",chat_session_id)
+        .append("message_id",message_id)
+        .append("user_id",user_id)
+        .append("content",content)
+        .insert(message_id);
+
+        if(!ret){
+            ERROR("es 插入{}消息数据失败:",message_id);
+            return false;
+        }
+
+        return true;
+    }
+
+    bool append(const std::shared_ptr<chat_im::Message_ODB>& message){
+        return this->append(message->messageSession_id(),message->messageSession_id(),message->sender_id(),message->message_text());
+    }
+
+    bool remove(const std::string& message_id){
+        bool ret = ESRemove(__es_client,"message")
+        .remove(message_id);
+        if(!ret){
+            ERROR("删除消息{}失败",message_id);
+            return false;
+        }
+        return true;
+    }
+
+    std::vector<chat_im::Message_ODB> search(
+        const std::string& session_id,
+        const std::string& key
+    ){
+        std::vector<chat_im::Message_ODB> ret;
+        Json::Value json_data = ESSearch(__es_client,"message")
+            .add_must_term("chat_session_id.keyword",session_id)
+            .add_must_match("content",key)
+            .search();
+
+        if(json_data.isArray() == false){
+            ERROR("搜索{}会话,关键词{}失败",session_id,key);
+            return ret;
+        }
+        int sz = json_data.size();
+        DEBUG("检索结果条目数量：{}", sz);
+        for (int i = 0; i < sz; i++)
+        {
+            chat_im::Message_ODB m(
+                json_data[i]["_source"]["user_id"].asString(),
+                json_data[i]["_source"]["chat_session_id"].asString(),
+                json_data[i]["_source"]["message_id"].asString(),
+                json_data[i]["_source"]["content"].asString());
+            ret.push_back(m);
+        }
+        return ret;
+    }
+
+
+private:
+    std::shared_ptr<elasticlient::Client> __es_client;
+
+
+};
 
 
 

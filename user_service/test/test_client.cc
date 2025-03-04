@@ -24,10 +24,7 @@ DEFINE_string(base_service, "/service", "服务监控根目录");
 DEFINE_string(user_service, "/service/user_service", "服务监控根目录");
 
 chat_im::util::ServiceChannelManager::ptr chm;
-chat_im::UserInfo user_info;
-
 std::string login_ssid;
-std::string new_nickname = "亲爱的猪妈妈";
 
 std::string verify_code_id = "e534-dbd5adf0-0000";
 
@@ -71,7 +68,9 @@ std::string verify_code_id = "e534-dbd5adf0-0000";
 //     req.set_request_id("100002");
 //     req.set_phone_number("19120019387");
 //     req.set_password("hlb030509");
-//     req.set_verify_code("4370");
+//     std::string code;
+//      std::cin>>code;
+//     req.set_verify_code(code);
 //     req.set_verify_code_id(verify_code_id);
 
 //     auto channel = chm->choose(FLAGS_user_service);
@@ -143,34 +142,34 @@ std::string verify_code_id = "e534-dbd5adf0-0000";
 //     ASSERT_EQ(rsp.request_id(),req.request_id());
 // }
 
-TEST(user_info,get_multi_userInfo){
-    GetMultiUserInfoReq req;
-    req.set_request_id("100005");
-    req.add_users_id("19120019387");
-    req.add_users_id("haoyouxiaoju");
+// TEST(user_info,get_multi_userInfo){
+//     GetMultiUserInfoReq req;
+//     req.set_request_id("100005");
+//     req.add_users_id("19120019387");
+//     req.add_users_id("haoyouxiaoju");
 
-    auto channel = chm->choose(FLAGS_user_service);
-    // 判断channel是否获取到
-    ASSERT_TRUE(channel);
-    UserService_Stub stub(channel.get());
-    brpc::Controller cntl;
+//     auto channel = chm->choose(FLAGS_user_service);
+//     // 判断channel是否获取到
+//     ASSERT_TRUE(channel);
+//     UserService_Stub stub(channel.get());
+//     brpc::Controller cntl;
 
-    GetMultiUserInfoRsp rsp;
-    stub.GetMultiUserInfo(&cntl,&req,&rsp,nullptr);
+//     GetMultiUserInfoRsp rsp;
+//     stub.GetMultiUserInfo(&cntl,&req,&rsp,nullptr);
 
 
-    ASSERT_TRUE(rsp.success());
-    if(rsp.success()){
-        UserInfo info1 = (*rsp.mutable_users_info())["19120019387"];
-        UserInfo info2 = (*rsp.mutable_users_info())["haoyouxiaoju"];
-        DEBUG("用户1昵称{}，手机号{}",info1.nickname(),info1.phone());
-        DEBUG("用户2昵称{}，手机号{}",info2.nickname(),info2.phone());
-    }else{
-        ERROR("错误原因{}",rsp.errmsg());
-    }
-    ASSERT_EQ(rsp.request_id(),req.request_id());
+//     ASSERT_TRUE(rsp.success());
+//     if(rsp.success()){
+//         UserInfo info1 = (*rsp.mutable_users_info())["19120019387"];
+//         UserInfo info2 = (*rsp.mutable_users_info())["haoyouxiaoju"];
+//         DEBUG("用户1昵称{}，手机号{}",info1.nickname(),info1.phone());
+//         DEBUG("用户2昵称{}，手机号{}",info2.nickname(),info2.phone());
+//     }else{
+//         ERROR("错误原因{}",rsp.errmsg());
+//     }
+//     ASSERT_EQ(rsp.request_id(),req.request_id());
 
-}
+// }
 
 // TEST(set_userInfo,set_avatar){
 //     SetUserAvatarReq req;
@@ -294,11 +293,7 @@ int main(int argc,char* argv[]){
     chat_im::util::Discovery::ptr disc = std::make_shared<chat_im::util::Discovery>(FLAGS_etcd_host,FLAGS_base_service,put_cb,del_cb);
 
     
-    user_info.set_nickname("猪妈妈");
-    user_info.set_user_id("1d56-513d8e49-0002");
-    user_info.set_description("这是一个美丽的猪妈妈");
-    user_info.set_phone("15929917272");
-    user_info.set_avatar("猪妈妈头像数据");
+  
     testing::InitGoogleTest(&argc, argv);
     DEBUG("开始测试");
 

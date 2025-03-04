@@ -8,6 +8,7 @@
 
 namespace chat_im{
 
+//odb -d mysql --generate-query --generate-schema --profile boost/date-time user.hxx
 
 #pragma db object
 class User{
@@ -80,8 +81,7 @@ private:
 
 
 };
-//odb -d mysql --generate-query --generate-schema --profile boost/date-time \
-//     user.hxx
+//     
 }
 
 #endif
