@@ -156,6 +156,7 @@ int main(int argc,char* argv[]){
         return -1;
     }
 
-
+    testing::InitGoogleTest(&argc, argv);
+    DEBUG("开始测试");
     return RUN_ALL_TESTS();
 }

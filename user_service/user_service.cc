@@ -1,4 +1,5 @@
 #include "user_service.hpp"
+#include <gflags/gflags.h>
 
 DEFINE_bool(run_mode, false, "程序的运行模式，false-调试； true-发布；");
 DEFINE_string(log_file, "", "发布模式下，用于指定日志的输出文件");
@@ -38,12 +39,14 @@ DEFINE_string(dms_key_secret, "TZyxvFGOhNEsD4jWfQVYT46Z5okaT1", "短信平台密
 
 
 int main(int argc,char* argv[]){
+
+
+    google::ParseCommandLineFlags(&argc,&argv,true);
     chat_im::util::__init_logger__(FLAGS_run_mode,FLAGS_log_file,FLAGS_log_level);
 
-        logging::LoggingSettings stt;
-        stt.logging_dest=logging::LoggingDestination::LOG_TO_NONE;
-        logging::InitLogging(stt);
-        
+    logging::LoggingSettings stt;
+    stt.logging_dest = logging::LoggingDestination::LOG_TO_NONE;
+    logging::InitLogging(stt);
 
     UserServiceBuilder builder;
     builder.makeRedisManager(FLAGS_redis_host,FLAGS_redis_port,FLAGS_redis_db,FLAGS_redis_keep_alive);
@@ -58,5 +61,5 @@ int main(int argc,char* argv[]){
     UserService::ptr service =  builder.build();
     service->start();
 
-        return 0;
+    return 0;
 }

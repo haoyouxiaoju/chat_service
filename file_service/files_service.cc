@@ -22,6 +22,10 @@ int main(int argc, char *argv[])
     google::ParseCommandLineFlags(&argc, &argv, true);
     util::__init_logger__(FLAGS_run_mode, FLAGS_log_file, FLAGS_log_level);
 
+    logging::LoggingSettings stt;
+    stt.logging_dest = logging::LoggingDestination::LOG_TO_NONE;
+    logging::InitLogging(stt);
+
     FileServiceBuilder fsb;
     fsb.make_rpcService(FLAGS_listen_port, FLAGS_rpc_timeout, FLAGS_rpc_threads, FLAGS_storage_path);
     fsb.make_regClient(FLAGS_registry_host, FLAGS_base_service + FLAGS_instance_name, FLAGS_access_host);

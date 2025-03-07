@@ -15,7 +15,7 @@ message GetFriendListReq{
 message GetFriendListRsp{
     string request_id =1;
     bool success =2;
-    string errmsg=3;
+    optional string errmsg=3;
     repeated UserInfo friend_list =4;   //好友列表
 }
 
@@ -30,7 +30,7 @@ message FriendRemoveReq{
 message FriendRemoveRsp {
     string request_id =1;
     bool success =2;
-    string errmsg=3;
+    optional string errmsg=3;
 }
 
 //
@@ -44,8 +44,8 @@ message FriendAddReq {
 message FriendAddRsp{
     string request_id =1;
     bool success =2;
-    string errmsg=3;
-    string notify_event_id =4;          //通知事件id
+    optional string errmsg=3;
+    optional string notify_event_id =4;          //通知事件id
 }
 //处理好友申请              被添加者处理请求 返回
 message FriendAddProcessReq{
@@ -54,13 +54,13 @@ message FriendAddProcessReq{
     bool agree=3;                   //是否同意
     string apply_user_id =4;        //申请人的用户id
     optional string session_id =5;
-    optional string user_id =6;
+    optional string user_id =6;     //被申请的 用户id
 }
 //  同意后会创建回话，向网关返回会话信息，用于通知双方会话的建立 
 message FriendAddProcessRsp{
     string request_id =1;
     bool success =2;
-    string errmsg=3;
+    optional string errmsg=3;
     optional string new_session_id =4;
 }
 // 获取待处理的好友申请列表   处理者为自己的申请

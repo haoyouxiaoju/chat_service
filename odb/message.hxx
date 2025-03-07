@@ -1,5 +1,5 @@
-#ifndef MESSAGE_ODB_HPP
-#define MESSAGE_ODB_HPP
+#ifndef MESSAGE_XIAOJU_HPP
+#define MESSAGE_XIAOJU_HPP
 
 #include <odb/core.hxx>
 #include <odb/nullable.hxx>
@@ -10,7 +10,7 @@
 //odb -d mysql --generate-query --generate-schema --profile boost/date-time message.hxx
 namespace chat_im
 {
-#pragma db object 
+#pragma db object table("Message")
 class Message_ODB{
 public:
     Message_ODB(
@@ -28,6 +28,8 @@ public:
     ) 
         : __sender_id(sender_id), __messageSession_id(messageSession_id),
          __message_id(message_id),__message_text(message_content) {}
+    
+    Message_ODB(){}    
     ~Message_ODB(){}
 
     void create_time(const boost::posix_time::ptime& time){__create_time = time;}

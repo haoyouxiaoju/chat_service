@@ -11,7 +11,6 @@
 
 
 
-
 class FileServiceImpl : public chat_im::FileService{
 
 public:

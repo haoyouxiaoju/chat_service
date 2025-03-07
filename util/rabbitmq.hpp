@@ -1,12 +1,12 @@
-#ifndef RABBITMQ_XIAOJU_HPP
-#define RABBITMQ_XIAOJU_HPP
+#pragma once
 
-#include <string>
-#include <thread>
 
+#include <ev.h> 
 #include <amqpcpp.h>
 #include <amqpcpp/libev.h>
-#include <ev.h> 
+
+#include <openssl/ssl.h>
+#include <openssl/opensslv.h>
 
 #include "logger.hpp"
 
@@ -130,5 +130,3 @@ private:
 }
 
 
-
-#endif

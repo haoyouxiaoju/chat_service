@@ -85,7 +85,7 @@ public:
         std::unordered_map<std::string,std::string> file_data_list;
         bool isOk = __downloadFiles(request_id,file_id_set,file_data_list);
         if(!isOk){
-            ERROR("{}从文件服务模块中批量获取文件失败",request);
+            ERROR("{}从文件服务模块中批量获取文件失败",request_id);
             return err_response("批量获取文件失败");
         }
         
@@ -93,7 +93,7 @@ public:
         std::unordered_map<std::string,chat_im::UserInfo> user_info_list;
         isOk = __getMultiUserInfo(request_id,sender_id_set,user_info_list);
         if(!isOk){
-            ERROR("{}从用户服务模块中获取多名用户信息失败",request);
+            ERROR("{}从用户服务模块中获取多名用户信息失败",request_id);
             return err_response("获取用户信息失败");
         }            
         
@@ -190,7 +190,7 @@ public:
         std::unordered_map<std::string,std::string> file_data_list;
         bool isOk = __downloadFiles(request_id,file_id_set,file_data_list);
         if(!isOk){
-            ERROR("{}从文件服务模块中批量获取文件失败",request);
+            ERROR("{}从文件服务模块中批量获取文件失败",request_id);
             return err_response("批量获取文件失败");
         }
         
@@ -198,7 +198,7 @@ public:
         std::unordered_map<std::string,chat_im::UserInfo> user_info_list;
         isOk = __getMultiUserInfo(request_id,sender_id_set,user_info_list);
         if(!isOk){
-            ERROR("{}从用户服务模块中获取多名用户信息失败",request);
+            ERROR("{}从用户服务模块中获取多名用户信息失败",request_id);
             return err_response("获取用户信息失败");
         }            
         
@@ -278,33 +278,23 @@ public:
             response->set_success(true);
             return ;            
         } 
-        //获取消息中的文件id和发送者id,组成列表
+
+        //获取消息中的发送者id,组成列表
         std::unordered_set<std::string> file_id_set,sender_id_set;
         for(int i=0;i<message_data.size();++i){
             sender_id_set.insert(message_data[i].sender_id());
-            if(!message_data[i].file_id().empty()){
-                file_id_set.insert(message_data[i].file_id());
-                DEBUG("需要下载的文件ID: {}", message_data[i].file_id());
-            }
-        }
-
-        //从文件服务中获取到文件内容
-        std::unordered_map<std::string,std::string> file_data_list;
-        bool isOk = __downloadFiles(request_id,file_id_set,file_data_list);
-        if(!isOk){
-            ERROR("{}从文件服务模块中批量获取文件失败",request);
-            return err_response("批量获取文件失败");
         }
         
         //从用户服务模块中获取用户信息
         std::unordered_map<std::string,chat_im::UserInfo> user_info_list;
-        isOk = __getMultiUserInfo(request_id,sender_id_set,user_info_list);
+        bool isOk = __getMultiUserInfo(request_id,sender_id_set,user_info_list);
         if(!isOk){
-            ERROR("{}从用户服务模块中获取多名用户信息失败",request);
+            ERROR("{}从用户服务模块中获取多名用户信息失败",request_id);
             return err_response("获取用户信息失败");
         }            
         
         //根据前面获取到的信息构建消息信息,最后完成报文
+        //由于是文本搜索,所以只对文本内容进行补充,不对文件内容进行补充
         for(int i =0 ; i<message_data.size();++i){
             chat_im::MessageInfo* info = response->add_message_list();
             info->set_message_id(message_data[i].message_id());
@@ -320,29 +310,6 @@ public:
                     data->mutable_string_message()->set_content(message_data[i].message_text());
                     break;
                 }
-                case chat_im::MessageType::IMAGE:
-                {
-                    data->set_message_type(chat_im::MessageType::IMAGE);
-                    data->mutable_image_message()->set_file_id(message_data[i].file_id());
-                    data->mutable_image_message()->set_image_content(file_data_list[message_data[i].file_id()]);
-                    break;
-                }
-                case chat_im::MessageType::SPEECH:
-                {
-                    data->set_message_type(chat_im::MessageType::SPEECH);
-                    data->mutable_speech_message()->set_file_id(message_data[i].file_id());
-                    data->mutable_speech_message()->set_file_contents(file_data_list[message_data[i].file_id()]);
-                    break;
-                }
-                case chat_im::MessageType::FILE:
-                {
-                    data->set_message_type(chat_im::MessageType::FILE);
-                    data->mutable_file_message()->set_file_id(message_data[i].file_id());
-                    data->mutable_file_message()->set_file_size(message_data[i].file_size());
-                    data->mutable_file_message()->set_file_name(message_data[i].file_name());
-                    data->mutable_file_message()->set_file_contents(file_data_list[message_data[i].file_id()]);
-                    break;
-                }
                 default:
                 {
                     ERROR("获取到的消息类型-{}-错误",message_data[i].message_type());
@@ -350,7 +317,6 @@ public:
                 }
             }
         }
-        
         response->set_success(true);                       
 
     }
@@ -365,10 +331,72 @@ public:
             ERROR("消息反序列化失败");
             return;
         }    
-
         
+        //
+        std::string file_id,file_name;
+        int64_t file_size;            
+        switch(info.data().message_type()){
+            case chat_im::MessageType::STRING:
+            {
+                isOk = __es_message_manager->append(
+                    info.chat_session_id(),
+                    info.message_id(),
+                    info.sender().user_id(),
+                    info.data().string_message().content()  
+                );
+                if(!isOk){
+                    ERROR("{}消息插入失败",info.message_id());
+                    return ;
+                }
+                break;
+            }         
+            case chat_im::MessageType::IMAGE:
+            {                
+                isOk = __uploadFile("",info.data().image_message().image_content(),"",info.data().image_message().image_content().size(),file_id);
+                if(!isOk){
+                    ERROR("{}图片上传文件服务系统失败",info.message_id());
+                    return ;
+                }
+                break;
+            }  
+            case chat_im::MessageType::FILE:
+            {
+                file_name = info.data().file_message().file_name();
+                file_size = info.data().file_message().file_size();
+                isOk = __uploadFile("",info.data().file_message().file_contents(),file_name,info.data().file_message().file_contents().size(),file_id);
+                if(!isOk){
+                    ERROR("{}文件上传文件服务系统失败",info.message_id());
+                    return ;
+                }
+                break;      
+            } 
+            case chat_im::MessageType::SPEECH:
+            {
+                isOk = __uploadFile("",info.data().speech_message().file_contents(),"",info.data().speech_message().file_contents().size(),file_id);
+                if(!isOk){
+                    ERROR("{}语音文件上传文件服务系统失败",info.message_id());
+                    return ;
+                }
+                break;
+            }          
+        }
+        
+        chat_im::Message_ODB message_odb(
+                info.sender().user_id(),
+                info.chat_session_id(),  
+                boost::posix_time::from_time_t(info.timestamp()),
+                info.data().message_type()
+        ) ; 
+         message_odb.message_id(info.message_id());
+        message_odb.file_id(file_id);
+        message_odb.file_name(file_name);
+        message_odb.file_size(file_size);
+        isOk = __message_manager->insert(message_odb);
+        if(!isOk){
+            ERROR("向数据库插入新消息失败!");
+            return;
+        }
 
-    
     }
 
 private:
@@ -394,7 +422,7 @@ private:
         stub.GetMultiFile(&cntl,&req,&rsp,nullptr);
 
         //请求失败
-        if(!rsp.success()){
+        if(cntl.Failed() ||!rsp.success()){
             ERROR("文件获取失败,失败原因:{}",rsp.errmsg());
             return false;
         }
@@ -432,7 +460,7 @@ private:
         stub.GetMultiUserInfo(&cntl,&req,&rsp,nullptr);
 
         //请求失败
-        if(!rsp.success()){
+        if(cntl.Failed() ||!rsp.success()){
             ERROR("用户消息获取失败,失败原因:{}",rsp.errmsg());
             return false;
         }
@@ -444,6 +472,39 @@ private:
         return true;
     }
 
+    bool __uploadFile(
+        const std::string& request_id,
+        const std::string& file_content,
+        const std::string& file_name,
+        int64_t file_size,
+        std::string& file_id
+    ){
+        chat_im::util::ServiceChannel::ChannelPtr channel = __channel_manager->choose(__file_service_name);
+        if(!channel){
+            ERROR("未寻找到文件服务模块");
+            return false;
+        }
+         chat_im::FileService_Stub stub(channel.get());
+         chat_im::PutSingleFileReq req;
+         req.set_request_id(request_id);
+         chat_im::FileUpLoadData* data = req.mutable_file_data();  
+         data->set_file_content(file_content);
+         data->set_file_name(file_name);
+         data->set_file_size(file_size);
+         chat_im::PutSingleFileRsp rsp;
+         brpc::Controller cntl;
+         stub.PutSingleFile(&cntl,&req,&rsp,nullptr);
+         if(cntl.Failed() || !rsp.success()){
+            ERROR("{}文件上传失败{}",file_name,rsp.errmsg());
+            return false;
+         }
+        file_id = rsp.file_info().file_id();
+
+        return true;
+        
+
+    
+    }
 
 private:
     chat_im::util::MessageTable::ptr __message_manager;

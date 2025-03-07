@@ -28,7 +28,8 @@ public:
            __db->persist(message); 
             trans.commit();
         }catch(std::exception& e){
-            ERROR("消息信息插入失败原因{}:,发送者{}-发送类型{}-发送时间{}",e.what(),message.sender_id(),message.message_type(),message.create_time());
+            ERROR("消息信息插入失败原因{}:,发送者{}-发送类型{}-发送时间{}",e.what(),message.sender_id(),message.message_type(), boost::posix_time::to_simple_string( message.create_time()));
+            
             return false;
         }
         return true;
