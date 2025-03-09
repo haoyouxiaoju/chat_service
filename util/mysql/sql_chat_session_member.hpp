@@ -81,6 +81,7 @@ public:
             ret.reserve(res.size());
             for(auto i = res.begin();i!=res.end();++i){
                 ret.push_back(*i);
+                // DEBUG("{}",i->user_id());
             }
             trans.commit();
         }

@@ -80,7 +80,7 @@ public:
         const std::string& msg,
         const std::string& routing_key = "rounting_key"
     ){
-        DEBUG("向交换机{}-{}发布消息{}",exchange,routing_key,msg);
+        // DEBUG("向交换机{}-{}发布消息{}",exchange,routing_key,msg);
         bool ret = __channel->publish(exchange,routing_key,msg);
         if(!ret){
             ERROR("{}发布消息失败:",exchange);

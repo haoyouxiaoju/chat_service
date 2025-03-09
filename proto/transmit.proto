@@ -30,7 +30,7 @@ message GetTransmitTargetRsp{
     string request_id =1;
     bool success =2;
     string errmsg=3;
-    MessageInfo message=4;
+    optional MessageInfo message=4;
     repeated string target_id_list=5;
 }
 

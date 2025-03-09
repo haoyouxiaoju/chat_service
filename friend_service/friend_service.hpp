@@ -430,6 +430,8 @@ public:
                                 for(auto i = sessionmember_list.begin();i!=sessionmember_list.end();++i){
                                         user_id_list.insert(i->user_id());
                                 }
+                                // 剔除请求的用户id
+                                // user_id_list.erase(user_id);
                                 //获取会话成员的信息
                                 std::unordered_map<std::string, chat_im::UserInfo> user_info_list;
                                 bool isOk = __getMultiUserInfo(request_id,user_id_list,user_info_list);
