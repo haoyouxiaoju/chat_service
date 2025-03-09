@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "chat_session_number.hxx"
+#include "chat_session_member.hxx"
 
 namespace chat_im{
 
@@ -20,6 +20,7 @@ enum class chatSessionType{
 class chatSession{
 public:
     chatSession(){}
+    ~chatSession(){}
     chatSession(
         const std::string& chat_session_id,
         const std::string& chat_session_name,

@@ -20,6 +20,7 @@ public:
     :__phone(phone),__password(password),   \
      __user_id(user_id),__nickname(nickname) {}
     User(){}
+    ~User(){}
 
     std::string user_id(){return __user_id;}
     void user_id(const std::string& value){ __user_id = value;}

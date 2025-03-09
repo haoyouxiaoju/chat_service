@@ -11,6 +11,8 @@ namespace chat_im{
 class friendRelation{
 
 public:
+    friendRelation(){}
+    ~friendRelation(){}
     friendRelation(const std::string& user_id,const std::string& friend_id):
         __user_id(user_id),__friend_id(friend_id){}
     

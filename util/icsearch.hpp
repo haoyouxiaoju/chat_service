@@ -190,7 +190,7 @@ public:
 
         Json::Value terms;
         terms["terms"] = item;
-        __must_not_terms["must_not"].append(terms);
+        __must_not_terms.append(terms);
         return *this;
     }
     ESSearch& add_should_match(const std::string& key,const std::string& value){
@@ -200,7 +200,7 @@ public:
         item[key]=value;
         match["match"]=item;
 
-        __should_match["should"].append(match);
+        __should_match.append(match);
 
         return *this;
     }
@@ -226,16 +226,19 @@ public:
         Json::Value query;
         Json::Value _bool;
 
-        _bool["must_not"] = (__must_not_terms);
-        _bool["should"] = (__should_match);
+        if (__must_not_terms.empty() == false) _bool["must_not"] = (__must_not_terms);
+        if (__should_match.empty() == false) _bool["should"] = (__should_match);
+        if (__must.empty() == false) _bool["must"]   = __must;
         query["bool"] = _bool;
         root["query"] = query;
+
+        // std::cout<<root;
 
         std::string str;
         bool rest = Serialize(root,str);
         if(rest == false){
             ERROR("序列化失败,无法搜索数据");
-            return nullptr;
+            return Json::Value();
         }
         
         Json::Value ret_value;
@@ -245,22 +248,22 @@ public:
             if (resp.status_code >= 300 || resp.status_code < 200)
             {
                 ERROR("搜索失败,响应码:{}", resp.status_code);
-                return nullptr;
+                return Json::Value();
             }
             rest = unSerivlize(resp.text, ret_value);
             if (rest == false || ret_value.empty())
             {
                 ERROR("反序列化失败,无法获取数据");
-                return nullptr;
+                return Json::Value();
             }
         }
         catch (std::exception &e)
         {
             ERROR("搜索失败,错误信息{}",e.what() );
-            return nullptr;
+            return Json::Value();
         }
 
-        return rest["hist"]["hist"];
+        return ret_value["hits"]["hits"];
 
 
     }

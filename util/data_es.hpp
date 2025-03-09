@@ -90,20 +90,21 @@ public:
         if(users_json.isArray() == false){
             DEBUG("用户搜索为空")
         }
+        // std::cout<<users_json;
         int size = users_json.size();
         std::vector<User> ret_data;
         for(int i=0;i<size;++i){
             User user;
             user.user_id(users_json[i]["_source"]["user_id"].asString());
             user.nickname(users_json[i]["_source"]["nickname"].asString());
-            user.password(users_json[i]["_source"]["password"].asString());
+            user.phone(users_json[i]["_source"]["phone"].asString());
             user.signature(users_json[i]["_source"]["signature"].asString());
             user.avatar_id(users_json[i]["_source"]["avatar_id"].asString());
 
             ret_data.push_back(std::move(user));
         }
 
-        return std::move(ret_data);
+        return ret_data;
     
     }
 

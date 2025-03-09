@@ -17,12 +17,14 @@ enum class friendStatus{
 class friendEvent{
 
 public:
+    friendEvent(){}
+    ~friendEvent(){}
     friendEvent(
         const std::string& event_id,
         const std::string& sender_id,
         const std::string& reciver_id,
         friendStatus status = friendStatus::PENDING
-    ):__sender_id(sender_id),__receiver_id(reciver_id){}
+    ):__sender_id(sender_id),__receiver_id(reciver_id),__friend_event_id(event_id){}
 
     void friend_event_id(const std::string& event_id){__friend_event_id = event_id;}
     std::string friend_event_id(){return __friend_event_id;}

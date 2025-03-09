@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 link_directories(/usr/local/lib)
+link_directories(/usr/lib)
 
 
 set(project_name friend_service)
@@ -36,7 +37,13 @@ endforeach()
 #odb 文件
 set(odb_path ${CMAKE_CURRENT_SOURCE_DIR}/../odb/)
 set(odb_files "")
-list(APPEND odb_files message.hxx user.hxx chat_session.hxx chat_session_member.hxx friend_event.hxx)
+list(APPEND odb_files
+    message.hxx
+    user.hxx
+    chat_session.hxx
+    chat_session_member.hxx
+    friend_event.hxx
+    friend_relation.hxx)
 
 # 检测odb文件是否生成
 set(odb_src "")
@@ -77,7 +84,8 @@ target_link_libraries(${project_name} -lgflags
 	/usr/lib/x86_64-linux-gnu/libjsoncpp.so.19
 	-lcpr -lelasticlient
 	-lboost_system
-	-lamqpcpp -lpthread -ldl -lev)
+	)
+
 
 
 # test
@@ -93,7 +101,7 @@ target_link_libraries(${test_project} -lgtest -lgflags -lspdlog -lfmt -lbrpc -ls
                  -lhiredis -lredis++
                   /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19
                   -lboost_system
-                  -lamqpcpp -lpthread -ldl -lev
+                  
                   )
 
 

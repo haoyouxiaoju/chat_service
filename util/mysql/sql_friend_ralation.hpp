@@ -12,16 +12,18 @@ namespace chat_im::util{
 
 class FriendRalationTable{
 public:
-    using ptr = std::shared_ptr<friendRalation>;
-    using query = odb::query<friendRalation>;
+    using ptr = std::shared_ptr<FriendRalationTable>;
+    using query = odb::query<friendRelation>;
+    using result = odb::result<friendRelation>;
     FriendRalationTable(const std::shared_ptr<odb::core::database>& db):__db(db){}
     
-    bool insert(friendRalation& elem){
+    bool insert(friendRelation& elem){
         try{
             odb::transaction trans(__db->begin());
             __db->persist(elem);
             //需要插入第二次 即 好友对 用户的好友关系
-            __db->persist(FriendRalation(elem.friend_id(),elem.user_id()));
+            friendRelation relation(elem.friend_id(),elem.user_id());
+            __db->persist(relation);
             trans.commit();
         }catch(std::exception& e){
             ERROR("插入{}-{}好友关系记录失败:{}",elem.user_id(),elem.friend_id(),e.what());
@@ -30,16 +32,18 @@ public:
         return true;
     }
 
-    bool insert(const std::shared_ptr<friendRalation>& elem){
+    bool insert(const std::shared_ptr<friendRelation>& elem){
         return insert(*elem);
     }
 
     bool remove(const std::string& user_id,const std::string& friend_id){
         try{
             odb::transaction trans(__db->begin());
-            __db->erase_query<friendRalation>(
-                (query::user_id == user_id && query::friend_id == friend_id)
-                (query::user_id == friend_id && query::friend_id == user_id)
+            __db->erase_query<friendRelation>(
+                query::user_id == user_id && query::friend_id == friend_id 
+            );
+            __db->erase_query<friendRelation>(
+                query::user_id == friend_id && query::friend_id == user_id
             );
             trans.commit();
         }catch(std::exception& e){
@@ -55,7 +59,7 @@ public:
         bool flags = false;
         try{
             odb::transaction trans(__db->begin());
-            result res(__db->query<friendRalation>(query::user_id == user_id && query::friend_id == friend_id));
+            result res(__db->query<friendRelation>(query::user_id == user_id && query::friend_id == friend_id));
             flags = !res.empty();
             trans.commit();
         }catch(std::exception& e){
@@ -69,7 +73,7 @@ public:
         std::vector<std::string> ret;
         try{
             odb::transaction trans(__db->begin());
-            result res(__db->query<friendRalation>(query::user_id == user_id));
+            result res(__db->query<friendRelation>(query::user_id == user_id));
             ret.reserve(res.size());
             for(auto i=res.begin();i!=res.end();++i){
                 ret.push_back((*i).friend_id());

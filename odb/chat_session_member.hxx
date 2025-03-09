@@ -11,6 +11,9 @@ namespace chat_im{
 #pragma db object table("chatSessionMember")
 class chatSessionMember{
 public:
+    chatSessionMember() {}
+    ~chatSessionMember() {}
+
     chatSessionMember(
         const std::string& chat_session_id,
         const std::string& user_id 

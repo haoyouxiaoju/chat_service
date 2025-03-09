@@ -15,7 +15,7 @@ public:
     using query = odb::query<chatSessionMember>;
     using result = odb::result<chatSessionMember>;
 
-    ChatSessionMemberTable(std::shared_ptr<odb::core::database> db):__db(db){}
+    ChatSessionMemberTable(const std::shared_ptr<odb::core::database>& db):__db(db){}
 
     bool insert(chatSessionMember& member){
         try
@@ -40,7 +40,8 @@ public:
         {
             odb::transaction trans(__db->begin());
             for(const std::string&id : user_id_list){
-                __db->persist(chatSessionMember(chat_session_id,id));
+                chatSessionMember member(chat_session_id,id);
+                __db->persist(member);
             }
             trans.commit();
         }
@@ -105,10 +106,11 @@ public:
         }
         catch (std::exception &e)
         {
-            ERROR("查询{}的聊天会话成员失败:{}",id,e.what());
+            ERROR("查询{}的聊天会话失败:{}",id,e.what());
         }
         return ret;
     }
+
 
 private:
     std::shared_ptr<odb::core::database> __db;
