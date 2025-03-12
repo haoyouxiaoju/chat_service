@@ -7,7 +7,7 @@ import "base.proto";
 
 enum NotifyType {
     FRIEND_ADD_APPLY =0;
-    FROEMD_ADD_PROCESS =1;
+    FRIEMD_ADD_PROCESS =1;
     CHAT_SESSION_CREATE =2;
     CHAT_MESSAGE =3;
     FRIEND_REMOVE =4;

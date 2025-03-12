@@ -113,7 +113,7 @@ message GetChatSessionListRsp{
 //创建会话
 message ChatSessionCreateReq{
     string request_id =1;
-    optional string sesison_id=2;
+    optional string session_id=2;
     optional string user_id =3;
     string chat_session_name =4;
     repeated string member_id_list =5;  //群聊的所有成员 包括群聊创建者

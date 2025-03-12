@@ -89,11 +89,14 @@ public:
             }
 
             chat_im::MessageInfo info;
-            info.set_message_id(chat_im::util::uuid());
+            const std::string uuid = chat_im::util::uuid();
+            info.set_message_id(uuid);
+            DEBUG("会话id{}",uuid);
             info.set_chat_session_id(chat_session_id);
             info.set_timestamp(time(nullptr));
             info.mutable_sender()->CopyFrom(rsp.user_info());
             info.mutable_data()->CopyFrom(request->message());
+            DEBUG("消息内容:{}",info.data().string_message().content());
 
             bool isOk = __mq_manager->publish(__exchange_name,info.SerializeAsString(),__rounting_key);
             if(!isOk){

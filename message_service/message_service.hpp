@@ -338,6 +338,7 @@ public:
         switch(info.data().message_type()){
             case chat_im::MessageType::STRING:
             {
+                // DEBUG("消息内容{}",info.data().string_message().content());
                 isOk = __es_message_manager->append(
                     info.chat_session_id(),
                     info.message_id(),
@@ -386,8 +387,9 @@ public:
                 info.chat_session_id(),  
                 boost::posix_time::from_time_t(info.timestamp()),
                 info.data().message_type()
-        ) ; 
-         message_odb.message_id(info.message_id());
+        ) ;
+        message_odb.message_id(info.message_id());
+        message_odb.message_text(info.data().string_message().content());
         message_odb.file_id(file_id);
         message_odb.file_name(file_name);
         message_odb.file_size(file_size);
