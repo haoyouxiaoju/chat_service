@@ -133,6 +133,7 @@ public:
                         const std::string request_id = request->request_id();
                         const std::string user_id = request->user_id();
                         const std::string respondent_id = request->respondent_id(); //被添加人
+                        DEBUG("申请者:{},被申请者:{}",user_id,respondent_id);
 
                         // 设置request_id
                         response->set_request_id(request_id);

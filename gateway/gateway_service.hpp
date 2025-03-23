@@ -1172,6 +1172,8 @@ private:
             ERROR("{}:未找到可提供业务处理的消息转发子服务节点！",req.request_id());
             return ERROR("未找到可提供业务处理的消息转发子服务节点！");
         }
+        //处理成功
+        DEBUG("获取消息存储服务成功");
 
         chat_im::MsgTransmitService_Stub stub(user_channel.get());
         brpc::Controller cntl;
@@ -1181,12 +1183,13 @@ private:
             ERROR("{} 文件子服务调用失败！", req.request_id());
             return err_response("文件子服务调用失败！");
         }
+        DEBUG("调用文件子服务成功");
         //处理成功
         if(transmit_rsp.success()){
             chat_im::NotifyMessage message;
             message.set_event_id(req.request_id());
             message.set_type(chat_im::NotifyType::CHAT_MESSAGE);
-            message.mutable_new_message_info()->CopyFrom(transmit_rsp.message());
+            message.mutable_new_message_info()->mutable_message_info()->CopyFrom(transmit_rsp.message());
             for(auto i = transmit_rsp.target_id_list().begin();i!=transmit_rsp.target_id_list().end();++i){
                 //不通知自己
                 if(i->compare(*uid) == 0){

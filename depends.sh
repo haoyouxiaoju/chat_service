@@ -11,24 +11,24 @@ get_depends() {
 }
 
 get_depends ./gateway/build/gateway_service ./gateway/depends
-get_depends ./file/build/files_service ./file/depends
-get_depends ./friend/build/friend_service ./friend/depends
-get_depends ./message/build/message_service ./message/depends
-get_depends ./speech/build/speech_service ./speech/depends
-get_depends ./transmite/build/transmite_service ./transmite/depends
-get_depends ./user/build/user_service ./user/depends
+get_depends ./file_service/build/files_service ./file_service/depends
+get_depends ./friend_service/build/friend_service ./friend_service/depends
+get_depends ./message_service/build/message_service ./message_service/depends
+get_depends ./speech_service/build/speech_service ./speech_service/depends
+get_depends ./messageTransmit_service/build/transmit_service ./messageTransmit_service/depends
+get_depends ./user_service/build/user_service ./user_service/depends
 
 cp /bin/nc ./gateway/
-cp /bin/nc ./file/
-cp /bin/nc ./friend/
-cp /bin/nc ./message/
-cp /bin/nc ./speech/
-cp /bin/nc ./transmite/
-cp /bin/nc ./user/
+cp /bin/nc ./file_service/
+cp /bin/nc ./friend_service/
+cp /bin/nc ./message_service/
+cp /bin/nc ./speech_service/
+cp /bin/nc ./messageTransmit_service/
+cp /bin/nc ./user_service/
 get_depends /bin/nc ./gateway/depends
-get_depends /bin/nc ./file/depends
-get_depends /bin/nc ./friend/depends
-get_depends /bin/nc ./message/depends
-get_depends /bin/nc ./speech/depends
-get_depends /bin/nc ./user/depends
-get_depends /bin/nc ./transmite/depends
+get_depends /bin/nc ./file_service/depends
+get_depends /bin/nc ./friend_service/depends
+get_depends /bin/nc ./message_service/depends
+get_depends /bin/nc ./speech_service/depends
+get_depends /bin/nc ./user_service/depends
+get_depends /bin/nc ./messageTransmit_service/depends

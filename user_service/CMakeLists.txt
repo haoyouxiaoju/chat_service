@@ -60,8 +60,8 @@ endforeach()
 #
 # 源文件
 set(project_src "")
-# list(APPEND project_src speech_service.cc)  
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ project_src)
+list(APPEND project_src user_service.cc)  
+# aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ project_src)
 message(${project_src})
 
 add_executable(${project_name} ${project_src} ${pb_src} ${odb_src})
@@ -75,18 +75,18 @@ target_link_libraries(${project_name} -lgflags -lspdlog -lfmt -lbrpc -lssl
                   /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
 
 
-# test
-set(test_project test_client)
-project(${test_project})
-set(test_files "")
-list(APPEND test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/test_client.cc)
-add_executable(${test_project} ${test_files} ${pb_src})
-target_link_libraries(${test_project} -lgtest -lgflags -lspdlog -lfmt -lbrpc -lssl  
-                 -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl  
-                 -lodb-mysql -lodb -lodb-boost      
-                 -lalibabacloud-sdk-core -lcpr -lelasticlient
-                 -lhiredis -lredis++
-                  /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
+# # test
+# set(test_project test_client)
+# project(${test_project})
+# set(test_files "")
+# list(APPEND test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/test_client.cc)
+# add_executable(${test_project} ${test_files} ${pb_src})
+# target_link_libraries(${test_project} -lgtest -lgflags -lspdlog -lfmt -lbrpc -lssl  
+#                  -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl  
+#                  -lodb-mysql -lodb -lodb-boost      
+#                  -lalibabacloud-sdk-core -lcpr -lelasticlient
+#                  -lhiredis -lredis++
+#                   /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
 
 
 #头文件搜索路径

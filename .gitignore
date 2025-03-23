@@ -17,6 +17,17 @@ build/
 # 存放odb文件生成后的文件
 /odb/out
 
+# 忽略文件上下传数据
+/data/
+/sql/
+
+
+# ignore all  nc depends
+/*/depends
+/*/nc
+
+# ignore all log files
+/middle
 
 # Compiled Object files
 *.slo

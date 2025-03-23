@@ -72,8 +72,8 @@ endforeach()
 #
 # 源文件
 set(project_src "")
-# list(APPEND project_src speech_service.cc)  
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ project_src)
+list(APPEND project_src gateway_service.cc)  
+# aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ project_src)
 message(${project_src})
 
 add_executable(${project_name} ${project_src} ${pb_src} ${odb_src})

@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
         FLAGS_user_service,FLAGS_speech_service, FLAGS_message_service, 
         FLAGS_friend_service,  FLAGS_transmite_service);
     gsb.make_server_object(FLAGS_websocket_listen_port, FLAGS_http_listen_port);
+
     auto server = gsb.build();
     server->start();
     return 0;

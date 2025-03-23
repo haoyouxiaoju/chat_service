@@ -38,7 +38,7 @@ public:
     Session(const std::shared_ptr<sw::redis::Redis>& redis_client):__redis_client(redis_client){}
 
     void append(const std::string& sid,const std::string& uid){
-        __redis_client->set(sid,uid,std::chrono::milliseconds(60000));
+        __redis_client->set(sid,uid,std::chrono::milliseconds(6000000));
     }
     void remove(const std::string& sid){
         __redis_client->del(sid);

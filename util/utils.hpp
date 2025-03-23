@@ -50,7 +50,11 @@ std::string verify_code(){
 //读取文件  
 bool readFile(const std::string& file_path,std::string& body){
     DEBUG("进入readFile开始读取");
-    DEBUG("读取的文件名{}",file_path);
+    DEBUG("读取的文件名{}", file_path);
+    if(file_path.back() == '/'){
+        DEBUG("读取的文件名不合法{}", file_path);
+        return false;
+    }
     std::ifstream file(file_path,std::ios_base::binary | std::ios_base::in);
     if(!file.is_open()){
         ERROR("读取文件{}:文件打开失败.",file_path);
@@ -76,6 +80,11 @@ bool readFile(const std::string& file_path,std::string& body){
 //
 //写入文件
 bool writeFile(const std::string& file_path,const std::string& body){
+    DEBUG("写入的文件名{}", file_path);
+    if(file_path.back() == '/'){
+        DEBUG("写入的文件名不合法{}", file_path);
+        return false;
+    }
     std::ofstream file(file_path,std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
     if(!file.is_open()){
         ERROR("写入文件{}:文件打开失败",file_path);

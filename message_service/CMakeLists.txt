@@ -38,6 +38,7 @@ set(odb_path ${CMAKE_CURRENT_SOURCE_DIR}/../odb/)
 set(odb_files "")
 list(APPEND odb_files message.hxx user.hxx)
 
+message("odb文件:"${odb_path}${odb_files})
 # 检测odb文件是否生成
 set(odb_src "")
 foreach(odb_file ${odb_files})
@@ -51,20 +52,21 @@ foreach(odb_file ${odb_files})
             COMMAND odb
             ARGS -d mysql --generate-query --std c++11 --generate-schema --profile boost/date-time ${odb_path}/${odb_file}
             DEPENDS ${odb_path}/${odb_file}
-            OUTPUT ${CMAKE_BINARY_DIR}/${odb_cxx} 
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${odb_cxx} 
             COMMENT "生成"${odb_cxx}
         )
     endif()
     list(APPEND odb_src ${CMAKE_CURRENT_BINARY_DIR}/${odb_cxx})
 endforeach()
 
+message("odb文件:"${odb_src})
 
 
 #
 # 源文件
 set(project_src "")
-# list(APPEND project_src speech_service.cc)  
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ project_src)
+list(APPEND project_src message_service.cc)  
+# aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ project_src)
 message(${project_src})
 
 add_executable(${project_name} ${project_src} ${pb_src} ${odb_src})
@@ -80,21 +82,21 @@ target_link_libraries(${project_name} -lgflags
 	-lamqpcpp -lpthread -ldl -lev)
 
 
-# test
-set(test_project test_client)
-project(${test_project})
-set(test_files "")
-list(APPEND test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/test_client.cc)
-add_executable(${test_project} ${test_files} ${pb_src} ${odb_src})
-target_link_libraries(${test_project} -lgtest -lgflags -lspdlog -lfmt -lbrpc -lssl  
-                 -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl  
-                 -lodb-mysql -lodb -lodb-boost      
-                 -lalibabacloud-sdk-core -lcpr -lelasticlient
-                 -lhiredis -lredis++
-                  /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19
-                  -lboost_system
-                  -lamqpcpp -lpthread -ldl -lev
-                  )
+# # test
+# set(test_project test_client)
+# project(${test_project})
+# set(test_files "")
+# list(APPEND test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/test_client.cc)
+# add_executable(${test_project} ${test_files} ${pb_src} ${odb_src})
+# target_link_libraries(${test_project} -lgtest -lgflags -lspdlog -lfmt -lbrpc -lssl  
+#                  -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl  
+#                  -lodb-mysql -lodb -lodb-boost      
+#                  -lalibabacloud-sdk-core -lcpr -lelasticlient
+#                  -lhiredis -lredis++
+#                   /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19
+#                   -lboost_system
+#                   -lamqpcpp -lpthread -ldl -lev
+#                   )
 
 
 #头文件搜索路径

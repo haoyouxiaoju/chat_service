@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 link_directories(/usr/local/lib)
 
 
-set(project_name transmit_service)
+set(project_name test_lab)
 project(${project_name})
 
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
@@ -10,7 +10,10 @@ project(${project_name})
 # proto 文件
 set(proto_path ${CMAKE_CURRENT_SOURCE_DIR}/../proto/)
 set(proto_files "")
-list(APPEND proto_files base.proto user.proto transmit.proto friend.proto)
+list(APPEND proto_files
+    user.proto
+    base.proto
+    )
 
 # 检测pb文件是否生成
 # set(pb_cc "")
@@ -33,54 +36,23 @@ foreach(proto_file ${proto_files})
 
 endforeach()
 
-#odb 文件
-set(odb_path ${CMAKE_CURRENT_SOURCE_DIR}/../odb/)
-set(odb_files "")
-list(APPEND odb_files
-    chat_session.hxx
-    chat_session_member.hxx
-    )
-
-# 检测odb文件是否生成
-set(odb_src "")
-foreach(odb_file ${odb_files})
-    string(REPLACE ".hxx" "-odb.cxx" odb_cxx ${odb_file})
-    string(REPLACE ".hxx" "-odb.hxx" odb_hxx ${odb_file})
-    string(REPLACE ".hxx" "-odb.ixx" odb_ixx ${odb_file})
-    string(REPLACE ".hxx" ".sql" odb_sql ${odb_file})
-    if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${odb_hxx})
-        add_custom_command(
-            PRE_BUILD
-            COMMAND odb
-            ARGS -d mysql --generate-query --std c++11 --generate-schema --profile boost/date-time ${odb_path}/${odb_file}
-            DEPENDS ${odb_path}/${odb_file}
-            OUTPUT ${CMAKE_BINARY_DIR}/${odb_cxx} 
-            COMMENT "生成"${odb_cxx}
-        )
-    endif()
-    list(APPEND odb_src ${CMAKE_CURRENT_BINARY_DIR}/${odb_cxx})
-endforeach()
-
 
 
 #
 # 源文件
 set(project_src "")
-list(APPEND project_src transmit_service.cc)  
-# aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ project_src)
+# list(APPEND project_src speech_service.cc)  
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ project_src)
 message(${project_src})
 
 add_executable(${project_name} ${project_src} ${pb_src} ${odb_src})
 
 # 设置需要连接的库
-target_link_libraries(${project_name} -lgflags 
-	-lspdlog -lfmt -lbrpc -lssl -lcrypto 
-	-lprotobuf -lleveldb -letcd-cpp-api 
-	-lcpprest -lcurl -lodb-mysql -lodb -lodb-boost
+target_link_libraries(${project_name}  
+	-lprotobuf -lleveldb 
 	/usr/lib/x86_64-linux-gnu/libjsoncpp.so.19
-	-lcpr -lelasticlient
-	-lboost_system
-	-lamqpcpp -lpthread -ldl -lev)
+	
+	)
 
 
 # # test

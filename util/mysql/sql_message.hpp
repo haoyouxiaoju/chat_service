@@ -98,9 +98,9 @@ public:
         try{
             odb::transaction trans(__db->begin());
             std::stringstream ss;
-            ss  << "messageMession_id='"
+            ss  << "messageSession_id='"
                 << session_id
-                << "' order by create_time desc limit"
+                << "' order by create_time desc limit "
                 << number;
             result res(__db->query<Message_ODB>(ss.str()));
             for(auto i = res.begin();i!=res.end();++i){

@@ -81,12 +81,12 @@ public:
             for(auto i = member_list.begin();i!=member_list.end();++i){
                 member_userId_list.insert(i->user_id());
             }
-            //去除发送者的id
-            member_userId_list.erase(user_id);
-            if(member_list.empty()){
-                ERROR("获取{}会话用户失败,成员个数0",chat_session_id);
-                return err_response("获取{}会话用户失败,成员个数0");
-            }
+            // //去除发送者的id
+            // member_userId_list.erase(user_id);
+            // if(member_list.empty()){
+            //     ERROR("获取{}会话用户失败,成员个数0",chat_session_id);
+            //     return err_response("获取{}会话用户失败,成员个数0");
+            // }
 
             chat_im::MessageInfo info;
             const std::string uuid = chat_im::util::uuid();
@@ -105,7 +105,9 @@ public:
             }
 
             response->mutable_message()->CopyFrom(info);
+
             for(const std::string& str : member_userId_list){
+
                 response->add_target_id_list(str);
             }
             response->set_success(true);

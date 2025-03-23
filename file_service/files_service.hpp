@@ -120,7 +120,7 @@ public:
 
         std::string file_id = chat_im::util::uuid();
         std::string file_name = __base_filepath+file_id;
-	INFO("{}-name{}-id{}",request->file_data().file_content(),request->file_data().file_name(),request->request_id());
+	// INFO("{}-name{}-id{}",request->file_data().file_content(),request->file_data().file_name(),request->request_id());
 	INFO("{}size",sizeof(*request));
         bool status = chat_im::util::writeFile(file_name,request->file_data().file_content());
         if(status == false){
