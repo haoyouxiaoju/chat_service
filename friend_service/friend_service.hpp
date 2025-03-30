@@ -225,11 +225,18 @@ public:
                         //需求文档要求是会删除请求记录,但我建议不删除
                         //      暂时采取修改事件状态,不删除事件
                         //
-                        event->event_status(chat_im::friendStatus::REJECT);
-                        isOk = __friend_event_manager->update(event);
+                        // event->event_status(chat_im::friendStatus::REJECT);
+                        // isOk = __friend_event_manager->update(event);
+                        // if(!isOk){
+                        //         ERROR("修改事件状态失败");
+                        //         return err_response("修改事件状态失败");
+                        // }
+                        //删除
+                        // event->event_status(chat_im::friendStatus::REJECT);
+                        isOk = __friend_event_manager->remove(event->friend_event_id());
                         if(!isOk){
-                                ERROR("修改事件状态失败");
-                                return err_response("修改事件状态失败");
+                                ERROR("删除事件失败");
+                                return err_response("删除事件失败");
                         }
                         response->set_success(true);
 
@@ -335,6 +342,7 @@ public:
                                 info->set_chat_session_id(elem.chat_session_id);
                                 info->set_chat_session_name(user_info_list[elem.friend_id].nickname());
                                 info->set_avatar(user_info_list[elem.friend_id].avatar());
+                                INFO("好友聊天会话构建{}-头像size:{}",elem.friend_id,user_info_list[elem.friend_id].avatar().size());
                                 chat_im::MessageInfo  m_info;
                                 isOk = __GetRecentMsg(request_id,elem.chat_session_id,m_info);
                                 if(!isOk){
@@ -537,6 +545,7 @@ private:
                 req.set_request_id(request_id);
                 for (const std::string &user_id : user_id_list)
                 {
+                        DEBUG("需要查询的用户id:{}",user_id);
                         req.add_users_id(user_id);
                 }
 
@@ -555,6 +564,7 @@ private:
                 for (const auto &[id, info] : rsp.users_info())
                 {
                         user_info_list.insert(std::pair(id, info));
+                        DEBUG("{}-头像size:{}",id,info.avatar().size());
                 }
 
 

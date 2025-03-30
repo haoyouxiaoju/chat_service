@@ -98,6 +98,7 @@ public:
             info.mutable_data()->CopyFrom(request->message());
             DEBUG("消息内容:{}",info.data().string_message().content());
 
+            //消息存储 通过rabbitmq把消息信息 提供给消息存储模块
             bool isOk = __mq_manager->publish(__exchange_name,info.SerializeAsString(),__rounting_key);
             if(!isOk){
                 ERROR("{}发送{}的消息存储失败",user_id,chat_session_id);

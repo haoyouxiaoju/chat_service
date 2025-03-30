@@ -21,6 +21,12 @@ public:
         __keep_alive(__client->leasekeepalive(3).get()),
         __lease_id(__keep_alive->Lease())
     {}
+    ~Registry(){
+
+        if(__keep_alive)
+            __keep_alive->Cancel();
+            __keep_alive.reset();
+    }
 
     //
     //注册
@@ -32,7 +38,6 @@ public:
         }
         return true;
     }
-    ~Registry(){__keep_alive->Cancel();}
 
 private:
 
@@ -76,7 +81,13 @@ public:
 
 
             }
-    ~Discovery(){}
+    ~Discovery(){
+        if(__watcher){
+            __watcher->Cancel();
+            __watcher.reset();
+        
+        }
+    }
 private:
 
     void callback(const etcd::Response& resp){

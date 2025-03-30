@@ -723,10 +723,11 @@ private:
             return err_response("好友子服务调用失败！");
         }
         //进行消息转发 对方在线则组织好友删除通知进行事件通知
+        DEBUG("apply_user_id:{},user_id:{}",req.apply_user_id(),*uid);
         server_t::connection_ptr conn = __ws_connection_manager->connection(req.apply_user_id());
         if(rsp.success() && conn){
             //获取申请人的用户信息
-            chat_im::UserInfo info,user_info;//info是申请者,user_info是被申请者
+            chat_im::UserInfo info,user_info;//info是被申请者,user_info是申请者
             bool isOk = __getUserInfo(req.request_id(),*uid,info);
             if(!isOk){
                 ERROR("获取{}好友申请者用户信息失败",*uid);
@@ -755,10 +756,10 @@ private:
                 chat_im::ChatSessionInfo* chat_session = create_chat_session_notify.mutable_new_chat_session_info()->mutable_chat_session_info();
                 chat_session->set_single_id(*uid);
                 chat_session->set_chat_session_id(rsp.new_session_id());
-                chat_session->set_chat_session_name(user_info.nickname());
-                chat_session->set_avatar(user_info.avatar());
+                chat_session->set_chat_session_name(info.nickname());
+                chat_session->set_avatar(info.avatar());
                 conn->send(create_chat_session_notify.SerializeAsString(),websocketpp::frame::opcode::binary);
-                DEBUG("对申请人进行会话创建通知！");
+                DEBUG("对申请人{}进行会话创建通知！",req.apply_user_id());
             }
             //获取被申请人的ws链接 ,并发送创建会话的消息
             server_t::connection_ptr user_conn = __ws_connection_manager->connection(*uid);
@@ -768,12 +769,12 @@ private:
                 create_chat_session_notify.set_event_id(req.request_id());
                 create_chat_session_notify.set_type(chat_im::NotifyType::CHAT_SESSION_CREATE);
                 chat_im::ChatSessionInfo* chat_session = create_chat_session_notify.mutable_new_chat_session_info()->mutable_chat_session_info();
-                chat_session->set_single_id(*uid);
+                chat_session->set_single_id(user_info.user_id());
                 chat_session->set_chat_session_id(rsp.new_session_id());
-                chat_session->set_chat_session_name(info.nickname());
-                chat_session->set_avatar(info.avatar());
-                conn->send(create_chat_session_notify.SerializeAsString(),websocketpp::frame::opcode::binary);
-                DEBUG("对处理人进行会话创建通知！");
+                chat_session->set_chat_session_name(user_info.nickname());
+                chat_session->set_avatar(user_info.avatar());
+                user_conn->send(create_chat_session_notify.SerializeAsString(),websocketpp::frame::opcode::binary);
+                DEBUG("对处理人{}进行会话创建通知！",*uid);
             }
         }
         response.set_content(rsp.SerializeAsString(),"application/x-protbuf");
@@ -1180,10 +1181,10 @@ private:
         stub.GetTransmitTarget(&cntl,&req,&transmit_rsp,nullptr);
 
         if (cntl.Failed()) {
-            ERROR("{} 文件子服务调用失败！", req.request_id());
-            return err_response("文件子服务调用失败！");
+            ERROR("{} 消息转发子服务调用失败！", req.request_id());
+            return err_response(" 消息转发子服务调用失败！");
         }
-        DEBUG("调用文件子服务成功");
+        DEBUG("调用消息转发子服务成功");
         //处理成功
         if(transmit_rsp.success()){
             chat_im::NotifyMessage message;

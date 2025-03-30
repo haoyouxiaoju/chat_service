@@ -441,7 +441,7 @@ public:
                 user.set_nickname(userData_list[i].nickname());
                 user.set_description(userData_list[i].signature());
                 user.set_phone(userData_list[i].phone());
-                user.set_avatar((*users_avatar)[uid].file_content());
+                user.set_avatar((*users_avatar)[userData_list[i].avatar_id()].file_content());
 
                }
                response->set_success(true);
@@ -805,7 +805,16 @@ public:
               const chat_im::util::Registry::ptr& reg
   ):
     __user_service(service),__reg_client(reg),__discovery(disc){}
-  ~UserService(){}
+  ~UserService(){
+    if(__user_service){
+      __user_service->Stop(0);
+      __user_service->Join();
+    }
+     // 2. 清理bvar监控变量
+     bvar::Variable::dump_exposed({}, nullptr);
+     google::protobuf::ShutdownProtobufLibrary();
+
+  }
 
 
   void start(){

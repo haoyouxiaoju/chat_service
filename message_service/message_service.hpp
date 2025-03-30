@@ -16,6 +16,7 @@
 #include "channel.hpp"
 #include "etcd.hpp"
 #include "rabbitmq.hpp"
+#include "util/utils.hpp"
 
 #include "message.pb.h"
 #include "file.pb.h"
@@ -354,6 +355,7 @@ public:
             case chat_im::MessageType::IMAGE:
             {                
                 isOk = __uploadFile("",info.data().image_message().image_content(),"",info.data().image_message().image_content().size(),file_id);
+                file_id = chat_im::util::uuid();
                 if(!isOk){
                     ERROR("{}图片上传文件服务系统失败",info.message_id());
                     return ;
@@ -364,6 +366,7 @@ public:
             {
                 file_name = info.data().file_message().file_name();
                 file_size = info.data().file_message().file_size();
+                file_id = chat_im::util::uuid();
                 isOk = __uploadFile("",info.data().file_message().file_contents(),file_name,info.data().file_message().file_contents().size(),file_id);
                 if(!isOk){
                     ERROR("{}文件上传文件服务系统失败",info.message_id());
@@ -374,6 +377,7 @@ public:
             case chat_im::MessageType::SPEECH:
             {
                 isOk = __uploadFile("",info.data().speech_message().file_contents(),"",info.data().speech_message().file_contents().size(),file_id);
+                file_id = chat_im::util::uuid();
                 if(!isOk){
                     ERROR("{}语音文件上传文件服务系统失败",info.message_id());
                     return ;
