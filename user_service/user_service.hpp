@@ -142,14 +142,14 @@ public:
 
                 //生成验证码并发送
                 const std::string code = chat_im::util::verify_code();
-                isOk = __dms_manager->send(phone,code);
+                // isOk = __dms_manager->send(phone,code);
                 DEBUG("{}验证码{}",phone,code);
 
-                if(!isOk){
-                  //
-                  ERROR("{}验证码发送失败",phone);
-                  return err_response("验证码发送失败");
-                }
+                // if(!isOk){
+                //   //
+                //   ERROR("{}验证码发送失败",phone);
+                //   return err_response("验证码发送失败");
+                // }
 
                 //生成验证码id并加入redis
                 const std::string code_id = chat_im::util::uuid();

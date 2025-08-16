@@ -218,7 +218,7 @@ public:
 
                                 response->set_success(true);
                                 response->set_new_session_id(chat_session_id);
-                                return ;
+                                // return ;
                                 
                         }
                         //不同意
@@ -233,6 +233,7 @@ public:
                         // }
                         //删除
                         // event->event_status(chat_im::friendStatus::REJECT);
+                        DEBUG("删除好友申请事件{}",event->friend_event_id());
                         isOk = __friend_event_manager->remove(event->friend_event_id());
                         if(!isOk){
                                 ERROR("删除事件失败");

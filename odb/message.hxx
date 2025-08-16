@@ -51,13 +51,13 @@ public:
     std::string message_text(){if(!__message_text)return std::string();     return *__message_text;}
 
     void file_id(const std::string& file_id){__file_id = file_id;}
-    std::string file_id(){if(__file_id)return std::string();                return *__file_id;}
+    std::string file_id(){if(!__file_id)return std::string();                return *__file_id;}
 
     void file_size(const unsigned long file_size){__file_size = file_size;}
-    unsigned long file_size(){if(__file_size)return 0;                      return *__file_size;}
+    unsigned long file_size(){if(!__file_size)return 0;                      return *__file_size;}
 
     void file_name(const std::string& file_name){__file_name = file_name;}
-    std::string file_name(){if(__file_name)return std::string();            return *__file_name;}
+    std::string file_name(){if(!__file_name)return std::string();            return *__file_name;}
 
 private:
     friend class odb::access;

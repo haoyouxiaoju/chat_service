@@ -3,6 +3,7 @@
 
 #include <brpc/server.h>
 #include <butil/logging.h>
+#include <openssl/sha.h>
 
 #include "logger.hpp"
 #include "etcd.hpp"
@@ -12,7 +13,7 @@
 
 
 class FileServiceImpl : public chat_im::FileService{
-
+  
 public:
 
     FileServiceImpl(const std::string& base_path)
@@ -115,27 +116,21 @@ public:
                        ::chat_im::PutSingleFileRsp *response,
                        ::google::protobuf::Closure *done){
         brpc::ClosureGuard guard(done);
-
+        DEBUG("{}:{}",request->file_data().file_name(),request->file_data().file_size());
         response->set_request_id(request->request_id());
-
-        std::string file_id = chat_im::util::uuid();
-        std::string file_name = __base_filepath+file_id;
-	// INFO("{}-name{}-id{}",request->file_data().file_content(),request->file_data().file_name(),request->request_id());
-	INFO("{}size",sizeof(*request));
-        bool status = chat_im::util::writeFile(file_name,request->file_data().file_content());
-        if(status == false){
-            ERROR("上传文件请求{}:写入失败",request->request_id());
-            response->set_success(false);
-            response->set_errmsg("写入文件数据失败！");
-            return;
-        }
-
-        response->set_success(true);
-        response->mutable_file_info()->set_file_id(file_id);
         response->mutable_file_info()->set_file_size(request->file_data().file_size());
         response->mutable_file_info()->set_file_name(request->file_data().file_name());
+        
+        StoreResult r = StoreFile(request->file_data().file_content());
+        response->set_success(r.success); 
+        //存储失败
+        if(!r.success){
+            DEBUG("存储失败:{}",r.errmsg);
+            response->set_errmsg(r.errmsg);
+            return;
+        }
+        response->mutable_file_info()->set_file_id(r.file_id);
         return ;
-
     }
     
     //
@@ -149,17 +144,15 @@ public:
         response->set_request_id(request->request_id());
         int _files_size = request->file_data().size();
         for(int i=0;i<_files_size;++i){
-            std::string file_id = chat_im::util::uuid();
-            std::string file_name = __base_filepath + file_id;
-            bool status = chat_im::util::writeFile(file_name,request->file_data(i).file_content());
-            if(status == false ){
-                ERROR("上传多个文件请求{}:写入失败", request->request_id());
+            DEBUG("{}:{}", request->file_data(i).file_name(), request->file_data(i).file_size());
+            StoreResult r = StoreFile(request->file_data(i).file_content());
+            if(!r.success){
                 response->set_success(false);
-                response->set_errmsg("写入文件数据失败！");
+                response->set_errmsg(r.errmsg);
                 return ;
             }
             chat_im::FileMessageInfo* info = response->add_file_info();
-            info->set_file_id(file_id);
+            info->set_file_id(r.file_id);
             info->set_file_size(request->file_data(i).file_size());
             info->set_file_name(request->file_data(i).file_name());
 
@@ -170,7 +163,138 @@ public:
     }
 
 private:
+    /**
+     * 用于文件存储状态
+     */
+    struct FileState
+    {
+        bool finished = false;
+        bool success = false;
+        std::string errmsg;
+        std::condition_variable cv;
+        std::mutex mtx;
+    };
+    /**
+     * 存储返回
+     */
+    struct StoreResult
+    {
+        bool success;
+        std::string file_id;
+        std::string errmsg;
+    };
+    // 计算文件内容的 SHA256 哈希
+    std::string calculateFileHash(const std::string& content) {
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        SHA256((const unsigned char*)content.data(), content.size(), hash);
+        return std::string(reinterpret_cast<char*>(hash), SHA256_DIGEST_LENGTH);
+    }
+    
+    /**
+     * 存储文件，包含哈希去重、并发控制、写入逻辑
+     */
+    StoreResult StoreFile(const std::string& file_content) {
+        StoreResult result;
+    
+        std::string hash_file = calculateFileHash(file_content);
+        std::string file_id = chat_im::util::uuid();
+        std::shared_ptr<FileState> file_state;
+        bool need_wait = false;
+        {
+            std::lock_guard lock(__file_mutex);
+            auto ite = __file_hashMap.find(hash_file);
+            /**
+             * 可能已经存储过,检查是否是其他插入key值,但还没存储完毕
+             */
+            if(ite != __file_hashMap.end()){
+                file_id = ite->second;
+                //判断是否提取插入的值
+                auto s_ite = __writing_files.find(file_id);
+                if(s_ite == __writing_files.end()){
+                    /**
+                     * 直接返回
+                     */
+                    result.success = true;
+                    result.file_id = file_id;
+                    return result;
+                }else{
+                    /**
+                     * 需要等待
+                     */
+                    file_state = s_ite->second;
+                    need_wait = true;
+                }
+            }else{
+                /**
+                 * 没有存储过,提前插入map中
+                 * 避免多个线程同时进行写入同一文件
+                 */
+                __file_hashMap[hash_file] = file_id;
+                file_state = std::make_shared<FileState>();
+                __writing_files[file_id] = file_state;
+            }
+        }
+        /**
+         * 等到另一线程写入完毕
+         */
+        DEBUG("finished {},use count {}",file_state->finished,file_state.use_count());
+        if (need_wait){
+            std::unique_lock<std::mutex> lock(file_state->mtx);
+            if(!file_state->cv.wait_for(lock,std::chrono::seconds(3),[&](){return file_state->finished;})){
+                // 等待超时处理
+                result.success = false;
+                result.errmsg = "文件处理超时";
+                return result;
+            }
+            result.success = file_state->success;
+            result.errmsg = file_state->errmsg;
+            result.file_id = file_id;
+            return result;
+        }
+        /**
+         * 存储文件,
+         */
+        std::string file_name = __base_filepath+file_id;
+        bool status = chat_im::util::writeFile(file_name,file_content);
+        {
+            std::lock_guard lock(file_state->mtx);
+            file_state->finished = true;
+            file_state->success = status;
+            if(!status){
+                file_state->errmsg = "写入文件失败";
+            }
+        }
+        /**
+         * 通知等待的线程
+         */
+        file_state->cv.notify_all();
+        
+        {
+            std::lock_guard lock(__file_mutex);
+            __writing_files.erase(file_id);
+        }
+        if(status == false){
+            /**
+             * 取消原先插入的map值
+             */
+            std::lock_guard lock(__file_mutex);
+            __file_hashMap.erase(hash_file);
+            result.success = false;
+            result.errmsg = "写入文件数据失败！";
+            return result;
+        }
+    
+        result.success = true;
+        result.file_id = file_id;
+        return result;
+    }
+
+
+private:
     std::string __base_filepath;
+    std::unordered_map<std::string,std::string> __file_hashMap;
+    std::unordered_map<std::string, std::shared_ptr<FileState>> __writing_files;
+    std::mutex __file_mutex;
 
 };
 

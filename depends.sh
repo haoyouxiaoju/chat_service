@@ -32,3 +32,5 @@ get_depends /bin/nc ./message_service/depends
 get_depends /bin/nc ./speech_service/depends
 get_depends /bin/nc ./user_service/depends
 get_depends /bin/nc ./messageTransmit_service/depends
+
+

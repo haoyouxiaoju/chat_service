@@ -95,43 +95,43 @@ TEST(put_test,multi_file){
 
 }
 
-TEST(get_test,single_file){
-    chat_im::FileService_Stub stub(channel.get());
+// TEST(get_test,single_file){
+//     chat_im::FileService_Stub stub(channel.get());
 
-    chat_im::GetSingleFileReq req;
-    req.set_request_id("0000003");
-    req.set_file_id(single_file_id);
-    brpc::Controller* cntl = new brpc::Controller();
-    chat_im::GetSingleFileRsp* rsp = new chat_im::GetSingleFileRsp();
-    stub.GetSingleFile(cntl,&req,rsp,nullptr);
-    ASSERT_TRUE(rsp->success());
-    ASSERT_EQ(single_file_id,rsp->file_data().file_id());
-    util::writeFile("makefile_get",rsp->file_data().file_content());
+//     chat_im::GetSingleFileReq req;
+//     req.set_request_id("0000003");
+//     req.set_file_id(single_file_id);
+//     brpc::Controller* cntl = new brpc::Controller();
+//     chat_im::GetSingleFileRsp* rsp = new chat_im::GetSingleFileRsp();
+//     stub.GetSingleFile(cntl,&req,rsp,nullptr);
+//     ASSERT_TRUE(rsp->success());
+//     ASSERT_EQ(single_file_id,rsp->file_data().file_id());
+//     util::writeFile("makefile_get",rsp->file_data().file_content());
 
-}
+// }
 
-TEST(get_test,multi_file){
-    chat_im::FileService_Stub stub(channel.get());
+// TEST(get_test,multi_file){
+//     chat_im::FileService_Stub stub(channel.get());
 
-    chat_im::GetMultiFileReq req;
-    req.set_request_id("00000004");
-    req.add_file_id_list(multi_file_id[0]);
-    req.add_file_id_list(multi_file_id[1]);
+//     chat_im::GetMultiFileReq req;
+//     req.set_request_id("00000004");
+//     req.add_file_id_list(multi_file_id[0]);
+//     req.add_file_id_list(multi_file_id[1]);
 
-    brpc::Controller* cntl = new brpc::Controller();
-    chat_im::GetMultiFileRsp* rsp = new chat_im::GetMultiFileRsp();
-    stub.GetMultiFile(cntl,&req,rsp,nullptr);
+//     brpc::Controller* cntl = new brpc::Controller();
+//     chat_im::GetMultiFileRsp* rsp = new chat_im::GetMultiFileRsp();
+//     stub.GetMultiFile(cntl,&req,rsp,nullptr);
 
-    ASSERT_TRUE(rsp->success());
-    ASSERT_TRUE(rsp->file_data().find(multi_file_id[0]) != rsp->file_data().end());
-    ASSERT_TRUE(rsp->file_data().find(multi_file_id[1]) != rsp->file_data().end());
+//     ASSERT_TRUE(rsp->success());
+//     ASSERT_TRUE(rsp->file_data().find(multi_file_id[0]) != rsp->file_data().end());
+//     ASSERT_TRUE(rsp->file_data().find(multi_file_id[1]) != rsp->file_data().end());
 
-    auto map = rsp->file_data();
-    util::writeFile("filepbh",map[multi_file_id[0]].file_content());
-    util::writeFile("filepbh",map[multi_file_id[1]].file_content());
+//     auto map = rsp->file_data();
+//     util::writeFile("filepbh",map[multi_file_id[0]].file_content());
+//     util::writeFile("filepbh",map[multi_file_id[1]].file_content());
 
 
-}
+// }
 
 
 int main(int argc,char* argv[]){

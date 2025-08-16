@@ -15,12 +15,17 @@ services:
       - ./middle/data/etcd:/var/lib/etcd:rw
     ports:
       - 2379:2379
-    restart: always
+    #restart: always
   mysql:
     image: mysql:8.0.39
     container_name: mysql-service
     environment:
       MYSQL_ROOT_PASSWORD: Hlb030509!
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pHlb030509!"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
     volumes:
       # 1. 希望容器内的程序能够访问宿主机上的文件
       # 2. 希望容器内程序运行所产生的数据文件能落在宿主机上
@@ -28,7 +33,7 @@ services:
       - ./middle/data/mysql:/var/lib/mysql:rw
     ports:
       - 3306:3306
-    restart: always
+    #restart: always
   redis:
     image: redis:6.0.16
     container_name: redis-service
@@ -38,7 +43,7 @@ services:
       - ./middle/data/redis:/var/lib/redis:rw
     ports:
       - 6379:6379
-    restart: always
+    #restart: always
   elasticsearch:
     image: elasticsearch:7.17.21
     container_name: elasticsearch-service
@@ -51,20 +56,25 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
-    restart: always
+    #restart: always
   rabbitmq:
     image: rabbitmq:3.9.13
     container_name: rabbitmq-service
     environment:
       RABBITMQ_DEFAULT_USER: root
       RABBITMQ_DEFAULT_PASS: 123456
+    healthcheck:  # 添加健康检查
+      test: ["CMD", "rabbitmqctl", "status"]  # 检查 RabbitMQ 状态
+      interval: 5s  # 每 5 秒检查一次
+      timeout: 10s  # 超时时间 10 秒
+      retries: 10   # 最多重试 10 次
     volumes:
       # 1. 希望容器内的程序能够访问宿主机上的文件
       # 2. 希望容器内程序运行所产生的数据文件能落在宿主机上
       - ./middle/data/rabbitmq:/var/lib/rabbitmq:rw
     ports:
       - 5672:5672
-    restart: always
+    #restart: always
 
   files_service:
     build: ./file_service
@@ -82,7 +92,7 @@ services:
       - 10002:10002
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    restart: always
+    #restart: always
     entrypoint:
       # 跟dockerfile中的cmd比较类似，都是容器启动后的默认操作--替代dockerfile中的cmd
       /im/bin/entrypoint.sh -h host.docker.internal -p 2379 -c "/im/bin/files_service -flagfile=/im/conf/file_server.conf"
@@ -104,7 +114,7 @@ services:
       - 10006:10006
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    restart: always
+    #restart: always
     depends_on:
       - etcd
       - mysql
@@ -129,7 +139,7 @@ services:
       - 9001:9001
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    restart: always
+    #restart: always
     depends_on:
       - etcd
       - redis
@@ -152,12 +162,16 @@ services:
       - 10005:10005
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    restart: always
+    #restart: always
     depends_on:
-      - etcd
-      - mysql
-      - elasticsearch
-      - rabbitmq
+      etcd:
+       condition: service_started
+      mysql:
+       condition: service_healthy
+      elasticsearch:
+       condition: service_started
+      rabbitmq:
+       condition: service_healthy
     entrypoint:
       # 跟dockerfile中的cmd比较类似，都是容器启动后的默认操作--替代dockerfile中的cmd
       /im/bin/entrypoint.sh -h host.docker.internal -p 2379,3306,9200,5672 -c "/im/bin/message_service -flagfile=/im/conf/message_server.conf"
@@ -177,7 +191,7 @@ services:
       - 10001:10001
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    restart: always
+    #restart: always
     depends_on:
       - etcd
     entrypoint:
@@ -199,11 +213,14 @@ services:
       - 10004:10004
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    restart: always
+    #restart: always
     depends_on:
-      - etcd
-      - mysql
-      - rabbitmq
+      etcd:
+       condition: service_started
+      mysql:
+       condition: service_healthy
+      rabbitmq:
+       condition: service_healthy
     entrypoint:
       # 跟dockerfile中的cmd比较类似，都是容器启动后的默认操作--替代dockerfile中的cmd
       /im/bin/entrypoint.sh -h host.docker.internal -p 2379,3306,5672 -c "/im/bin/transmit_service -flagfile=/im/conf/transmite_server.conf"
@@ -223,7 +240,7 @@ services:
       - 10003:10003
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    restart: always
+    #restart: always
     depends_on:
       - etcd
       - mysql

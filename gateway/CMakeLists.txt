@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 link_directories(/usr/local/lib)
 
+# 在每个子模块的CMakeLists.txt开头添加：
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
+
 
 set(project_name gateway_service)
 project(${project_name})

@@ -3,6 +3,14 @@ cmake_minimum_required(VERSION 3.10)
 set(project_name files_service)
 project(${project_name})
 
+find_package(OpenSSL REQUIRED)
+
+# 在每个子模块的CMakeLists.txt开头添加：
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
+
+
 # proto 文件
 set(proto_path ${CMAKE_CURRENT_SOURCE_DIR}/../proto/)
 set(proto_files "")
@@ -39,17 +47,17 @@ message(${project_src})
 add_executable(${project_name} ${project_src} ${pb_src})
 
 # 设置需要连接的库
-target_link_libraries(${project_name} -lgflags -lspdlog -lfmt -lbrpc -lssl -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
+target_link_libraries(${project_name} -lgflags -lspdlog -lfmt -lbrpc -lssl -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19 OpenSSL::Crypto)
 
 
-## test
-#set(test_project test_client)
-#project(${test_project})
-#set(test_files "")
-#list(APPEND test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/test_client.cc)
-#add_executable(${test_project} ${test_files} ${pb_src})
-#target_link_libraries(${test_project} -lgtest -lgflags -lspdlog -lfmt -lbrpc -lssl -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
-#
+# test
+set(test_project test_client)
+project(${test_project})
+set(test_files "")
+list(APPEND test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/test_client.cc)
+add_executable(${test_project} ${test_files} ${pb_src})
+target_link_libraries(${test_project} -lgtest -lgflags -lspdlog -lfmt -lbrpc -lssl -lcrypto -lprotobuf -lleveldb -letcd-cpp-api -lcpprest -lcurl /usr/lib/x86_64-linux-gnu/libjsoncpp.so.19)
+
 
 
 #头文件搜索路径

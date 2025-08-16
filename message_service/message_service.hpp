@@ -16,7 +16,7 @@
 #include "channel.hpp"
 #include "etcd.hpp"
 #include "rabbitmq.hpp"
-#include "util/utils.hpp"
+#include "utils.hpp"
 
 #include "message.pb.h"
 #include "file.pb.h"
