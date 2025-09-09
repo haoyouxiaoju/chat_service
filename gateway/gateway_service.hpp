@@ -1084,7 +1084,7 @@ private:
         util::ServiceChannel::ChannelPtr user_channel =  __channel_manager->choose(__message_service_name);
         if(!user_channel){
             ERROR("{}:未找到可提供业务处理的消息存储子服务节点！",req.request_id());
-            return ERROR("未找到可提供业务处理的消息存储子服务节点！");
+            return err_response("未找到可提供业务处理的消息存储子服务节点！");
         }
 
         chat_im::MsgStorageService_Stub stub(user_channel.get());

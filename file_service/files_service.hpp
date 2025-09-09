@@ -4,6 +4,8 @@
 #include <brpc/server.h>
 #include <butil/logging.h>
 #include <openssl/sha.h>
+#include <bthread/mutex.h>
+#include <bthread/condition_variable.h>
 
 #include "logger.hpp"
 #include "etcd.hpp"
@@ -122,6 +124,7 @@ public:
         response->mutable_file_info()->set_file_name(request->file_data().file_name());
         
         StoreResult r = StoreFile(request->file_data().file_content());
+        DEBUG("store result status:{},file_id:{}",r.success,r.file_id);
         response->set_success(r.success); 
         //存储失败
         if(!r.success){
@@ -130,6 +133,7 @@ public:
             return;
         }
         response->mutable_file_info()->set_file_id(r.file_id);
+        DEBUG("store file is successed");
         return ;
     }
     
@@ -171,8 +175,8 @@ private:
         bool finished = false;
         bool success = false;
         std::string errmsg;
-        std::condition_variable cv;
-        std::mutex mtx;
+        bthread::ConditionVariable cv;
+        bthread::Mutex mtx;
     };
     /**
      * 存储返回
@@ -197,11 +201,13 @@ private:
         StoreResult result;
     
         std::string hash_file = calculateFileHash(file_content);
+        DEBUG("存储文件的哈希值:{}",hash_file);
         std::string file_id = chat_im::util::uuid();
         std::shared_ptr<FileState> file_state;
         bool need_wait = false;
         {
-            std::lock_guard lock(__file_mutex);
+            // std::lock_guard lock(__file_mutex);
+            std::lock_guard<bthread::Mutex> lock(__file_mutex);
             auto ite = __file_hashMap.find(hash_file);
             /**
              * 可能已经存储过,检查是否是其他插入key值,但还没存储完毕
@@ -239,12 +245,26 @@ private:
          */
         DEBUG("finished {},use count {}",file_state->finished,file_state.use_count());
         if (need_wait){
-            std::unique_lock<std::mutex> lock(file_state->mtx);
-            if(!file_state->cv.wait_for(lock,std::chrono::seconds(3),[&](){return file_state->finished;})){
-                // 等待超时处理
-                result.success = false;
-                result.errmsg = "文件处理超时";
-                return result;
+            DEBUG("wait file {}",file_id);
+            std::unique_lock<bthread::Mutex> lock(file_state->mtx);
+            butil::Timer timer;
+            timer.start();
+            constexpr int wait_time_ms = 3000;
+            while(!file_state->finished){
+                int64_t remaining_ms = wait_time_ms - timer.m_elapsed()/1000;
+                if(remaining_ms <= 0){
+                    result.success = false;
+                    result.errmsg = "文件处理超时";
+                    return result;
+                }
+                int wait_result = file_state->cv.wait_for(lock,remaining_ms);
+                if(wait_result == ETIMEDOUT){
+                    continue;
+                }else if(wait_result != 0){
+                    result.success = false;
+                    result.errmsg = "等待被中断";
+                    return result;
+                }
             }
             result.success = file_state->success;
             result.errmsg = file_state->errmsg;
@@ -255,9 +275,11 @@ private:
          * 存储文件,
          */
         std::string file_name = __base_filepath+file_id;
+        DEBUG("存储的文件名:{}",file_name);
         bool status = chat_im::util::writeFile(file_name,file_content);
         {
-            std::lock_guard lock(file_state->mtx);
+            // std::lock_guard lock(file_state->mtx);
+            std::lock_guard<bthread::Mutex> lock(file_state->mtx);
             file_state->finished = true;
             file_state->success = status;
             if(!status){
@@ -270,20 +292,20 @@ private:
         file_state->cv.notify_all();
         
         {
-            std::lock_guard lock(__file_mutex);
+            std::lock_guard<bthread::Mutex> lock(__file_mutex);
             __writing_files.erase(file_id);
-        }
-        if(status == false){
-            /**
-             * 取消原先插入的map值
-             */
-            std::lock_guard lock(__file_mutex);
-            __file_hashMap.erase(hash_file);
-            result.success = false;
-            result.errmsg = "写入文件数据失败！";
-            return result;
+            if(status == false){
+                /**
+                 * 取消原先插入的map值
+                 */
+                __file_hashMap.erase(hash_file);
+                result.success = false;
+                result.errmsg = "写入文件数据失败！";
+                return result;
+            }
         }
     
+        DEBUG("存储的文件成功:{}",file_name);
         result.success = true;
         result.file_id = file_id;
         return result;
@@ -294,7 +316,7 @@ private:
     std::string __base_filepath;
     std::unordered_map<std::string,std::string> __file_hashMap;
     std::unordered_map<std::string, std::shared_ptr<FileState>> __writing_files;
-    std::mutex __file_mutex;
+    bthread::Mutex __file_mutex;
 
 };
 

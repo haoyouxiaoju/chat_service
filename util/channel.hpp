@@ -112,7 +112,7 @@ class ServiceChannelManager{
                 std::unordered_set<std::string>::iterator ite = __follow_service.find(service_name);
                 if (ite == __follow_service.end())
                 {
-                    DEBUG("上线所需服务{}", service_name);
+                    DEBUG("上线服务{}", service_name);
                     return;
                 }
 
@@ -141,7 +141,7 @@ class ServiceChannelManager{
                 std::unordered_set<std::string>::iterator ite = __follow_service.find(service_name);
                 if (ite == __follow_service.end())
                 {
-                    DEBUG("下线无关服务{}", service_name);
+                    DEBUG("{}服务下线", service_name);
                     return;
                 }
 
